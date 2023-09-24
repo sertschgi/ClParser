@@ -11,10 +11,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(SOURCES
     src/Parser.cpp
-    include/clparser/Parser.hpp
 )
 
 add_library(ClParser ${SOURCES})
+
+target_include_directories(ClParser PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
 
 install(TARGETS ClParser
     LIBRARY DESTINATION lib
