@@ -42,10 +42,10 @@ class GenFunc_ {
 
 class ArgFunc_ {
    private:
-    bool isSet_;
+    bool isSet_ = false;
 
    public:
-    void setIsSet(bool value);
+    void setIsSet(bool value = true);
     bool isSet();
 };
 

@@ -12,10 +12,15 @@ using namespace std;
 /* ############# HELP FUNCTIONS ############# */
 
 static string join(vector<string> vec) {
-    return accumulate(
-        vec.begin() + 1, vec.end(), vec[0],
-        [](const string &acc, const string &val) { return acc + ", " + val; }
-    );
+    string result = "";
+    for (string piece : vec)
+    {
+        if (result != "")
+            result += ", ";
+        
+        result += piece;
+    }
+    return result;
 }
 
 template <class T>
@@ -224,7 +229,7 @@ string CommandFunc_::getHelp() {
         helpstr += join(opt.flags()) + "  |  " + opt.name() + "  |  " +
                    opt.desc() + "\n";
     }
-    helpstr += "\ncommands\n";
+    helpstr += "\ncommands:\n";
     for (ClCommand cmd : this->commands_) {
         helpstr += cmd.name() + "  |  " + cmd.desc() + "\n";
     }
@@ -312,12 +317,13 @@ void ClParser::parse(int &argc, char *argv[]) {
     }
 
     for (ClOption option : this->options_) {
-        if (option.name() == "help") {
+        if (option.name() == "help" && option.isSet()) {
             showHelp(1);
-        } else if (option.name() == "version") {
+        } else if (option.name() == "version" && option.isSet()) {
             showVersion();
         }
     }
+    return;
 }
 
 bool ClParser::addForAll_(const ClOption &option, ClCommand &clcmd) {
@@ -352,4 +358,62 @@ void ClParser::showVersion() {
 
 void ClParser::addAppName(const string &name) {
     this->name_ = name;
+}
+
+
+/* ############# MAIN ############# */
+int main
+    (
+    int argc,
+    char *argv[]
+    )
+{
+    ClOption datasetNameOption("dataset-name", {"n", "name"}, "Specify the name of your dataset.", true);
+    ClOption datasetLabelOption("dataset-label", {"l", "labels"}, "Specify the path of your labelmap.pbtxt", true);
+    ClOption datsetLabelPathOption("dataset-label-path", {"a", "labels_path"}, "Specify the label path.", true);
+    ClOption datasetImagePathOption("dataset-image-path", {"m", "images_path"}, "Specify the images path.", true);
+    ClCommand createDatasetCommand(
+        "dataset",
+        {
+         datasetNameOption,
+         datasetLabelOption,
+         datsetLabelPathOption,
+         datasetImagePathOption
+        }
+    );
+    /*
+    ClOption profileNameOption({"n", "name"}, "Specify the name of your profile.", true);
+    ClOption profileFrameworkOption({"f", "framework"}, "Specify the framework you want to use.", true);
+    ClOption profileScopeOption({"s", "scope"}, "Specify which field of machine lerning you want to use.", true);
+    ClCommand createProfileCommand(
+        "profile",
+        {
+         profileNameOption,
+         profileFrameworkOption,
+         profileScopeOption
+        }
+    );
+
+
+    ClCommand createProjectCommand("project", projectOptions);
+    ClCommand createModelCommand("model", modelOptions);
+    */
+    ClCommandList createCommands = {
+        createDatasetCommand
+    };
+
+    ClCommand createCommand("create", createCommands);
+
+    ClParser parser({createCommand});
+    parser.addHelpOption();
+    parser.addAppName("sclai");
+
+    parser.parse(argc, argv);
+
+    if (createDatasetCommand.isSet())
+    {
+        cout << "crating Dataset...";
+    }
+
+    return 0;
 }
