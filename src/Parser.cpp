@@ -103,7 +103,7 @@ ClPosArg::ClPosArg(const string &name, const string &defValue) {
 
 /* ############# POSARG FUNC ############# */
 
-const vector<ClPosArg> &PosArgFunc_::posArgs() {
+const ClPosArgList &PosArgFunc_::posArgs() {
     return posArgs_;
 }
 
@@ -111,7 +111,7 @@ bool PosArgFunc_::addPosArgument(const ClPosArg &posArg) {
     return addObjToVec<ClPosArg>(posArg, this->posArgs_);
 }
 
-bool PosArgFunc_::addPosArguments(const vector<ClPosArg> &posArgs) {
+bool PosArgFunc_::addPosArguments(const ClPosArgList &posArgs) {
     return addVecToVec<ClPosArg>(posArgs, this->posArgs_);
 }
 
@@ -119,7 +119,7 @@ bool PosArgFunc_::addPosArguments(const vector<ClPosArg> &posArgs) {
 
 void ClOption::init_(
     const string &name, const vector<string> &flags, const string &description,
-    const vector<ClPosArg> &posArgs
+    const ClPosArgList &posArgs
 ) {
     this->name_ = name;
     this->addFlags(flags);
@@ -149,7 +149,7 @@ ClOption::ClOption(
 
 ClOption::ClOption(
     const string &name, const vector<string> &flags, const string &description,
-    const vector<ClPosArg> &posArgs
+    const ClPosArgList &posArgs
 ) {
     this->init_(name, flags, description, posArgs);
 }
@@ -160,7 +160,7 @@ const vector<string> &ClOption::flags() {
 
 /* ############# OPTION FUNC ############# */
 
-const vector<ClOption> &OptionFunc_::options() {
+const ClOptionList &OptionFunc_::options() {
     return this->options_;
 }
 
@@ -168,15 +168,15 @@ bool OptionFunc_::addOption(const ClOption &option) {
     return addObjToVec<ClOption>(option, this->options_);
 }
 
-bool OptionFunc_::addOptions(const vector<ClOption> &options) {
+bool OptionFunc_::addOptions(const ClOptionList &options) {
     return addVecToVec<ClOption>(options, this->options_);
 }
 
 /* ############# CL COMMAND ############# */
 
 void ClCommand::init_(
-    const string &name, const vector<ClOption> &options,
-    const vector<ClCommand> &commands
+    const string &name, const ClOptionList &options,
+    const ClCommandList &commands
 ) {
     this->name_ = name;
     this->addOptions(options);
@@ -186,11 +186,11 @@ void ClCommand::init_(
 ClCommand::ClCommand(const string &name) {
     this->init_(name, {}, {});
 }
-ClCommand::ClCommand(const string &name, const vector<ClOption> &options) {
+ClCommand::ClCommand(const string &name, const ClOptionList &options) {
     this->init_(name, options, {});
 }
 
-ClCommand::ClCommand(const string &name, const vector<ClCommand> &commands) {
+ClCommand::ClCommand(const string &name, const ClCommandList &commands) {
     this->init_(name, {}, commands);
 }
 
@@ -200,7 +200,7 @@ bool CommandFunc_::addCommand(const ClCommand &command) {
     return addObjToVec<ClCommand>(command, this->commands_);
 }
 
-bool CommandFunc_::addCommands(const vector<ClCommand> &commands) {
+bool CommandFunc_::addCommands(const ClCommandList &commands) {
     return addVecToVec<ClCommand>(commands, this->commands_);
 }
 
@@ -231,15 +231,15 @@ void CommandFunc_::showHelp(int exitCode) {
     exit(exitCode);
 }
 
-const vector<ClCommand> &CommandFunc_::commands() {
+const ClCommandList &CommandFunc_::commands() {
     return this->commands_;
 }
 
 /* ############# CL PARSER ############# */
 
 void ClParser::init_(
-    const vector<ClCommand> &commands, const vector<ClOption> &options,
-    const vector<ClPosArg> &posArgs
+    const ClCommandList &commands, const ClOptionList &options,
+    const ClPosArgList &posArgs
 ) {
     addVecToVec<ClCommand>(commands, this->commands_);
     addVecToVec<ClOption>(options, this->options_);
@@ -247,18 +247,18 @@ void ClParser::init_(
 }
 
 ClParser::ClParser() {}
-ClParser::ClParser(const vector<ClCommand> &commands) {
+ClParser::ClParser(const ClCommandList &commands) {
     this->init_(commands, {}, {});
 }
-ClParser::ClParser(const vector<ClOption> &options) {
+ClParser::ClParser(const ClOptionList &options) {
     this->init_({}, options, {});
 }
-ClParser::ClParser(const vector<ClPosArg> &posArgs) {
+ClParser::ClParser(const ClPosArgList &posArgs) {
     this->init_({}, {}, posArgs);
 }
 ClParser::ClParser(
-    const vector<ClCommand> &commands, const vector<ClOption> &options,
-    const vector<ClPosArg> &posArgs
+    const ClCommandList &commands, const ClOptionList &options,
+    const ClPosArgList &posArgs
 ) {
     this->init_(commands, options, posArgs);
 }
