@@ -292,7 +292,7 @@ void ClParser::parse_(vector<string> args, ClCommand &clcmd) {
     }
 }
 
-void ClParser::parse(const int &argc, const char *argv[]) {
+void ClParser::parse(int &argc, char *argv[]) {
     vector<string> args(argv + 1, argv + argc);
     ClCommand cmd(string(), this->options_, this->commands_);
     this->parse_(args, cmd);

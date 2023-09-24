@@ -190,7 +190,7 @@ class ClParser : public CommandFunc_ {
         const ClCommandList& commands, const ClOptionList& options,
         const vector<ClPosArg>& posArgs
     );
-    void parse(const int& argc, const char* argv[]);
+    void parse(int& argc, char* argv[]);
     bool addHelpOption();
     bool addForAll(const ClOption& option);
     bool addVersionOption();
