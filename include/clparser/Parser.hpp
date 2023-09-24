@@ -103,7 +103,7 @@ class ClOption : public PosArgFunc_, public GenFunc_, public ArgFunc_ {
     void addFlag(const string& flag);
     void addFlags(const vector<string>& flags);
     const vector<string>& flags();
-    void setRequired(bool value);
+    void setRequired(bool value = true);
     bool isRequired();
 };
 
