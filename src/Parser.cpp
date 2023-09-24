@@ -9,15 +9,6 @@
 
 using namespace std;
 
-/* ############# ERRORS ############# */
-
-/*
-NotEnoughArgumentsError::NotEnoughArgumentsError(const string & name)
-{
-    runtime_error(("Not enough arguments on " + name));
-}
-*/
-
 /* ############# HELP FUNCTIONS ############# */
 
 static string join(vector<string> vec) {
@@ -119,12 +110,13 @@ bool PosArgFunc_::addPosArguments(const ClPosArgList &posArgs) {
 
 void ClOption::init_(
     const string &name, const vector<string> &flags, const string &description,
-    const ClPosArgList &posArgs
+    const ClPosArgList &posArgs, bool required
 ) {
     this->name_ = name;
     this->addFlags(flags);
     this->desc_ = description;
     this->addPosArguments(posArgs);
+    this->required_ = required;
 }
 
 void ClOption::addFlag(const string &flag) {
@@ -142,21 +134,28 @@ void ClOption::addFlags(const vector<string> &flags) {
 }
 
 ClOption::ClOption(
-    const string &name, const vector<string> &flags, const string &description
+    const string &name, const vector<string> &flags, const string &description, bool required
 ) {
-    this->init_(name, flags, description, {});
+    this->init_(name, flags, description, {}, required);
 }
 
 ClOption::ClOption(
     const string &name, const vector<string> &flags, const string &description,
-    const ClPosArgList &posArgs
+    const ClPosArgList &posArgs, bool required
 ) {
-    this->init_(name, flags, description, posArgs);
+    this->init_(name, flags, description, posArgs, required);
 }
 
 const vector<string> &ClOption::flags() {
     return this->flags_;
 }
+
+void ClOption::setRequired(bool value)
+{
+    this->required_ = value;
+}
+
+bool ClOption::isRequired(){return this->required_;}
 
 /* ############# OPTION FUNC ############# */
 
@@ -278,6 +277,12 @@ void ClParser::parse_(vector<string> args, ClCommand &clcmd) {
         }
         for (ClCommand cmd : clcmd.commands()) {
             if (arg == cmd.name()) {
+                for (ClOption opt : clcmd.options()) {
+                    if (opt.isRequired() && !opt.isSet())
+                    {
+                        throw OptionRequiredError(opt.name());
+                    }
+                }
                 cmd.setIsSet(true);
                 args.erase(args.begin());
                 this->parse_(args, cmd);

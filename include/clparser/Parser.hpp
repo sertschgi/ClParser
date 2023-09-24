@@ -18,6 +18,13 @@ class NotEnoughArgumentsError : public runtime_error {
         : runtime_error(("Not enough arguments on " + name)) {}
 };
 
+class OptionRequiredError : public runtime_error {
+   public:
+    OptionRequiredError(const string& name)
+        : runtime_error((name + " option required!")) {}
+};
+
+
 /* ############# GEN FUNC ############# */
 
 class GenFunc_ {
@@ -71,27 +78,33 @@ class PosArgFunc_ {
 /* ############# CL OPTION ############# */
 
 class ClOption : public PosArgFunc_, public GenFunc_, public ArgFunc_ {
-   protected:
+   private:
+    bool required_;
     vector<string> flags_;
     vector<string> values_;
     void init_(
         const string& name, const vector<string>& flags,
-        const string& description, const vector<ClPosArg>& posArgs
+        const string& description, const vector<ClPosArg>& posArgs,
+        bool required
     );
 
    public:
     ClOption(
         const string& name, const vector<string>& flags,
-        const string& description
+        const string& description,
+        bool required = false
     );
     ClOption(
         const string& name, const vector<string>& flags,
-        const string& description, const vector<ClPosArg>& posArgs
+        const string& description, const vector<ClPosArg>& posArgs,
+        bool required = false
     );
 
     void addFlag(const string& flag);
     void addFlags(const vector<string>& flags);
     const vector<string>& flags();
+    void setRequired(bool value);
+    bool isRequired();
 };
 
 /* ############# CL OPTION LIST ############# */
