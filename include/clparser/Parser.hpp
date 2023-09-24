@@ -168,7 +168,7 @@ class ClCommand : public CommandFunc_, public ArgFunc_ {
 /* ############# CL PARSER ############# */
 
 class ClParser : public CommandFunc_ {
-   protected:
+   private:
     string name_ = string();
     string appVersion_;
     ClCommandList setCommands_;

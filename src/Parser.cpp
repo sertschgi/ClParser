@@ -193,6 +193,16 @@ ClCommand::ClCommand(const string &name, const ClCommandList &commands) {
     this->init_(name, {}, commands);
 }
 
+ClCommand::ClCommand
+        (
+        const string &name, 
+        const ClOptionList &options, 
+        const ClCommandList &commands
+        )
+    {
+    this->init_(name, options, commands);
+}
+
 /* ############# COMMAND FUNC ############# */
 
 bool CommandFunc_::addCommand(const ClCommand &command) {
@@ -294,7 +304,7 @@ void ClParser::parse_(vector<string> args, ClCommand &clcmd) {
 
 void ClParser::parse(int &argc, char *argv[]) {
     vector<string> args(argv + 1, argv + argc);
-    ClCommand cmd(string(), this->options_, this->commands_);
+    ClCommand cmd({}, this->options_, this->commands_);
     this->parse_(args, cmd);
 
     if (this->posArgsToSet_.size() > 0) {
