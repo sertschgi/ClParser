@@ -1,48 +1,87 @@
 #include "../include/clparser/Parser.hpp"
 
-int main(int argc, char* argv[])
-{
-    ClOption * datasetNameOption = new ClOption("dataset-name", {"n", "name"}, "Specify the name of your dataset.", true);
-    ClOption * datasetLabelOption = new ClOption("dataset-label", {"l", "labels"}, "Specify the path of your labelmap.pbtxt", true);
-    ClOption * datsetLabelPathOption = new ClOption("dataset-label-path", {"a", "labels_path"}, "Specify the label path.", true);
-    ClOption * datasetImagePathOption = new ClOption("dataset-image-path", {"m", "images_path"}, "Specify the images path.", true);
-    ClCommand * createDatasetCommand = new ClCommand(
-        "dataset",
-        {
-         datasetNameOption,
-         datasetLabelOption,
-         datsetLabelPathOption,
-         datasetImagePathOption
-        }
+int main(int argc, char* argv[]) {
+    ClPosArg datasetNamePosArg("dataset-name");
+    ClOption datasetNameOption(
+        "dataset-name", { "n", "name" }, "Specify the name of your dataset.",
+        { &datasetNamePosArg }, true
     );
-    /*
-    ClOption profileNameOption({"n", "name"}, "Specify the name of your profile.", true);
-    ClOption profileFrameworkOption({"f", "framework"}, "Specify the framework you want to use.", true);
-    ClOption profileScopeOption({"s", "scope"}, "Specify which field of machine lerning you want to use.", true);
+
+    ClOption datasetLabelOption(
+        "dataset-label", { "l", "labels" },
+        "Specify the path of your labelmap.pbtxt", true
+    );
+    ClOption datsetLabelPathOption(
+        "dataset-label-path", { "a", "labels_path" }, "Specify the label path.",
+        true
+    );
+    ClOption datasetImagePathOption(
+        "dataset-image-path", { "m", "images_path" },
+        "Specify the images path.", true
+    );
+    ClCommand createDatasetCommand(
+        "dataset", { &datasetNameOption, &datasetLabelOption,
+                     &datsetLabelPathOption, &datasetImagePathOption }
+    );
+
+    ClOption profileNameOption(
+        "profile-name", { "n", "name" }, "Specify the name of your profile.",
+        true
+    );
+    ClOption profileFrameworkOption(
+        "profile-framework", { "f", "framework" },
+        "Specify the framework you want to use.", true
+    );
+    ClOption profileScopeOption(
+        "profile-scope", { "s", "scope" },
+        "Specify which field of machine lerning you want to use.", true
+    );
     ClCommand createProfileCommand(
         "profile",
-        {
-         profileNameOption,
-         profileFrameworkOption,
-         profileScopeOption
-        }
+        { &profileNameOption, &profileFrameworkOption, &profileScopeOption }
     );
 
+    ClOption projectNameOption(
+        "project-name", { "n", "name" }, "Specify the name of your project.",
+        true
+    );
+    ClOption projectProfileOption(
+        "project-profile", { "p", "profile" },
+        "Specify the profile you want to use for your project.", true
+    );
+    ClOption projectDatasetOption(
+        "project-dataset", { "d", "dataset" },
+        "Specify the dataset you want to use.", true
+    );
+    ClCommand createProjectCommand(
+        "project",
+        { &projectNameOption, &projectProfileOption, &projectDatasetOption }
+    );
 
-    ClCommand createProjectCommand("project", projectOptions);
-    ClCommand createModelCommand("model", modelOptions);
-    */
-    ClCommandPtrList createCommands = {
-        createDatasetCommand
-    };
+    ClOption modelNameOption(
+        "model-name", { "n", "name" }, "Specify the name of your model.", true
+    );
+    ClOption modelProjectOption(
+        "model-project", { "p", "project" },
+        "Specify the project you want to use for your model.", true
+    );
+    ClOption modelModelOption(
+        "model-model", { "m", "model" }, "Specify the model you want to use.",
+        true
+    );
+    ClCommand createModelCommand(
+        "model", { &modelNameOption, &modelProjectOption, &modelModelOption }
+    );
 
-    ClCommand * createCommand = new ClCommand(std::string("create"), createCommands);
+    ClCommandPtrList createCommands = { &createDatasetCommand,
+                                        &createProfileCommand,
+                                        &createProjectCommand,
+                                        &createModelCommand };
 
-    ClParser parser({createCommand});
-    parser.addHelpOption();
-    parser.addAppName("test");
+    ClCommand createCommand(std::string("create"), createCommands);
 
-    cout << "before parsing";
+    ClParser parser({ &createCommand });
+    parser.addAppName("0.0.1");
 
     parser.parse(argc, argv);
 }

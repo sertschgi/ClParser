@@ -13,23 +13,23 @@ using namespace std;
 /* ############# ERRORS ############# */
 
 class NotEnoughArgumentsError : public std::exception {
-    private:
-    string message{};
+   private:
+    string message {};
 
-    public:
+   public:
     NotEnoughArgumentsError(string msg) : message(msg) {}
-    const char * what () {
+    const char* what() {
         return (string("Not enough arguments on ") + message).c_str();
     }
 };
 
 class OptionRequiredError : public std::exception {
-    private:
-    string message{};
+   private:
+    string message {};
 
-    public:
+   public:
     OptionRequiredError(string msg) : message(msg) {}
-    const char * what () {
+    const char* what() {
         return (message + " option required!").c_str();
     }
 };
@@ -41,11 +41,11 @@ using ClStringList = vector<string>;
 /* ############# GEN FUNC ############# */
 
 class GenFunc_ {
-protected:
-    string name_{};
-    string desc_{};
+   protected:
+    string name_ {};
+    string desc_ {};
 
-public:
+   public:
     void addDescription(const string& desc);
     const string& desc();
     const string& name() const;
@@ -54,10 +54,10 @@ public:
 /* ############# ARG FUNC ############# */
 
 class ArgFunc_ {
-private:
+   private:
     bool isSet_ = false;
 
-public:
+   public:
     void setIsSet(bool value = true);
     bool isSet();
 };
@@ -65,11 +65,13 @@ public:
 /* ############# CL POSARG ############# */
 
 class ClPosArg : public ArgFunc_, public GenFunc_ {
-protected:
-    string value_{};
+   protected:
+    string value_ {};
 
-public:
+   public:
     ClPosArg(const string& name, const string& defValue = string());
+    const string value();
+    void setValue(const string& value);
 };
 
 /* ############# CL POSARG LIST ############# */
@@ -80,38 +82,37 @@ using ClPosArgPtrList = vector<ClPosArg*>;
 /* ############# POSARG FUNC ############# */
 
 class PosArgFunc_ {
-protected:
-    ClPosArgPtrList posArgs_{};
+   protected:
+    ClPosArgPtrList posArgs_ {};
 
-public:
+   public:
     bool addPosArgument(ClPosArg& posArg);
     bool addPosArguments(const ClPosArgPtrList& posArgs);
-    const ClPosArgPtrList &posArgs();
+    const ClPosArgPtrList& posArgs();
 };
 
 /* ############# CL OPTION ############# */
 
 class ClOption : public PosArgFunc_, public GenFunc_, public ArgFunc_ {
-private:
-    bool required_{};
-    ClStringList flags_{};
-    ClStringList values_{};
+   private:
+    bool required_ {};
+    ClStringList flags_ {};
     void init_(
-        const string &name, const ClStringList& flags, const string &description,
-        const ClPosArgPtrList &posArgs, bool required = false
-        );
+        const string& name, const ClStringList& flags,
+        const string& description, const ClPosArgPtrList& posArgs,
+        bool required = false
+    );
 
-public:
+   public:
     ClOption(
         const string& name, const ClStringList& flags,
-        const string& description,
-        bool required = false
-        );
+        const string& description, bool required = false
+    );
     ClOption(
         const string& name, const ClStringList& flags,
         const string& description, const ClPosArgPtrList& posArgs,
         bool required = false
-        );
+    );
 
     void addFlag(const string& flag);
     void addFlags(const ClStringList& flags);
@@ -128,12 +129,12 @@ using ClOptionPtrList = vector<ClOption*>;
 /* ############# OPTION FUNC ############# */
 
 class OptionFunc_ {
-protected:
-    ClOptionPtrList options_{};
-    ClOptionList ownOptions_{};
+   protected:
+    ClOptionPtrList options_ {};
+    ClOptionList ownOptions_ {};
 
-public:
-    bool addOption(ClOption &option);
+   public:
+    bool addOption(ClOption& option);
     bool addOptions(const ClOptionPtrList& options);
     bool addOwnOption(ClOption option);
     bool addOwnOptions(ClOptionList options);
@@ -153,10 +154,10 @@ using ClCommandPtrList = vector<ClCommand*>;
 /* ############# COMMAND FUNC ############# */
 
 class CommandFunc_ : public GenFunc_, public PosArgFunc_, public OptionFunc_ {
-protected:
-    ClCommandPtrList commands_{};
+   protected:
+    ClCommandPtrList commands_ {};
 
-public:
+   public:
     bool addCommand(ClCommand& command);
     bool addCommands(const ClCommandPtrList& commands);
     string getHelp();
@@ -170,38 +171,38 @@ public:
 /* ############# CL COMMAND ############# */
 
 class ClCommand : public CommandFunc_, public ArgFunc_ {
-private:
+   private:
     void init_(
         const string& name, const ClOptionPtrList& options,
         const ClCommandPtrList& commands
-        );
+    );
 
-public:
+   public:
     ClCommand(const string& name);
     ClCommand(const string& name, const ClOptionPtrList& options);
     ClCommand(const string& name, const ClCommandPtrList& commands);
     ClCommand(
         const string& name, const ClOptionPtrList& options,
         const ClCommandPtrList& commands
-        );
+    );
 };
 
 /* ############# CL PARSER ############# */
 
 class ClParser : public CommandFunc_ {
-private:
-    string name_{};
-    string appVersion_{};
-    ClCommandList setCommands_{};
-    ClPosArgPtrList posArgsToSet_{};
+   private:
+    string name_ {};
+    string appVersion_ {};
+    ClCommandList setCommands_ {};
+    ClPosArgPtrList posArgsToSet_ {};
     void init_(
         const ClCommandPtrList& commands, const ClOptionPtrList& options,
         const ClPosArgPtrList& posArgs
-        );
+    );
     void parse_(ClStringList args, ClCommand& clcmd);
     bool addForAll_(const ClOption& option, ClCommand& clcmd);
 
-public:
+   public:
     ClParser();
     ClParser(const ClCommandPtrList& commands);
     ClParser(const ClOptionPtrList& options);
@@ -209,7 +210,7 @@ public:
     ClParser(
         const ClCommandPtrList& commands, const ClOptionPtrList& options,
         const ClPosArgPtrList& posArgs
-        );
+    );
     void parse(int& argc, char* argv[]);
     bool addHelpOption();
     bool addVersionOption();
