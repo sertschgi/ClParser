@@ -12,27 +12,40 @@ using namespace std;
 
 /* ############# ERRORS ############# */
 
-class NotEnoughArgumentsError : public runtime_error {
-   public:
-    NotEnoughArgumentsError(const string& name)
-        : runtime_error(("Not enough arguments on " + name)) {}
+class NotEnoughArgumentsError : public std::exception {
+    private:
+    string message{};
+
+    public:
+    NotEnoughArgumentsError(string msg) : message(msg) {}
+    const char * what () {
+        return (string("Not enough arguments on ") + message).c_str();
+    }
 };
 
-class OptionRequiredError : public runtime_error {
-   public:
-    OptionRequiredError(const string& name)
-        : runtime_error((name + " option required!")) {}
+class OptionRequiredError : public std::exception {
+    private:
+    string message{};
+
+    public:
+    OptionRequiredError(string msg) : message(msg) {}
+    const char * what () {
+        return (message + " option required!").c_str();
+    }
 };
 
+/* ############ Cl StringList ############# */
+
+using ClStringList = vector<string>;
 
 /* ############# GEN FUNC ############# */
 
 class GenFunc_ {
-   protected:
-    string name_;
-    string desc_;
+protected:
+    string name_{};
+    string desc_{};
 
-   public:
+public:
     void addDescription(const string& desc);
     const string& desc();
     const string& name() const;
@@ -41,10 +54,10 @@ class GenFunc_ {
 /* ############# ARG FUNC ############# */
 
 class ArgFunc_ {
-   private:
+private:
     bool isSet_ = false;
 
-   public:
+public:
     void setIsSet(bool value = true);
     bool isSet();
 };
@@ -52,75 +65,80 @@ class ArgFunc_ {
 /* ############# CL POSARG ############# */
 
 class ClPosArg : public ArgFunc_, public GenFunc_ {
-   protected:
-    string value_;
+protected:
+    string value_{};
 
-   public:
+public:
     ClPosArg(const string& name, const string& defValue = string());
 };
 
 /* ############# CL POSARG LIST ############# */
 
 using ClPosArgList = vector<ClPosArg>;
+using ClPosArgPtrList = vector<ClPosArg*>;
 
 /* ############# POSARG FUNC ############# */
 
 class PosArgFunc_ {
-   protected:
-    vector<ClPosArg> posArgs_;
+protected:
+    ClPosArgPtrList posArgs_{};
 
-   public:
-    bool addPosArgument(const ClPosArg& posArg);
-    bool addPosArguments(const vector<ClPosArg>& posArgs);
-    const vector<ClPosArg>& posArgs();
+public:
+    bool addPosArgument(ClPosArg& posArg);
+    bool addPosArguments(const ClPosArgPtrList& posArgs);
+    const ClPosArgPtrList &posArgs();
 };
 
 /* ############# CL OPTION ############# */
 
 class ClOption : public PosArgFunc_, public GenFunc_, public ArgFunc_ {
-   private:
-    bool required_;
-    vector<string> flags_;
-    vector<string> values_;
+private:
+    bool required_{};
+    ClStringList flags_{};
+    ClStringList values_{};
     void init_(
-        const string& name, const vector<string>& flags,
-        const string& description, const vector<ClPosArg>& posArgs,
-        bool required
-    );
+        const string &name, const ClStringList& flags, const string &description,
+        const ClPosArgPtrList &posArgs, bool required = false
+        );
 
-   public:
+public:
     ClOption(
-        const string& name, const vector<string>& flags,
+        const string& name, const ClStringList& flags,
         const string& description,
         bool required = false
-    );
+        );
     ClOption(
-        const string& name, const vector<string>& flags,
-        const string& description, const vector<ClPosArg>& posArgs,
+        const string& name, const ClStringList& flags,
+        const string& description, const ClPosArgPtrList& posArgs,
         bool required = false
-    );
+        );
 
     void addFlag(const string& flag);
-    void addFlags(const vector<string>& flags);
-    const vector<string>& flags();
+    void addFlags(const ClStringList& flags);
+    const ClStringList& flags();
     void setRequired(bool value = true);
-    bool isRequired();
+    const bool isRequired();
 };
 
 /* ############# CL OPTION LIST ############# */
 
 using ClOptionList = vector<ClOption>;
+using ClOptionPtrList = vector<ClOption*>;
 
 /* ############# OPTION FUNC ############# */
 
 class OptionFunc_ {
-   protected:
-    ClOptionList options_;
+protected:
+    ClOptionPtrList options_{};
+    ClOptionList ownOptions_{};
 
-   public:
-    bool addOption(const ClOption& option);
-    bool addOptions(const ClOptionList& options);
-    const ClOptionList& options();
+public:
+    bool addOption(ClOption &option);
+    bool addOptions(const ClOptionPtrList& options);
+    bool addOwnOption(ClOption option);
+    bool addOwnOptions(ClOptionList options);
+    const ClOptionPtrList& options();
+    const ClOptionList& ownOptions();
 };
 
 /* ############# CL COMMAND ############# */
@@ -130,69 +148,70 @@ class ClCommand;
 /* ############# CL COMMAND LIST ############# */
 
 using ClCommandList = vector<ClCommand>;
+using ClCommandPtrList = vector<ClCommand*>;
 
 /* ############# COMMAND FUNC ############# */
 
 class CommandFunc_ : public GenFunc_, public PosArgFunc_, public OptionFunc_ {
-   protected:
-    ClCommandList commands_;
+protected:
+    ClCommandPtrList commands_{};
 
-   public:
-    bool addCommand(const ClCommand& command);
-    bool addCommands(const ClCommandList& commands);
+public:
+    bool addCommand(ClCommand& command);
+    bool addCommands(const ClCommandPtrList& commands);
     string getHelp();
     void showHelp();
     void showHelp(int exitCode);
-    const ClCommandList& commands();
+    const ClCommandPtrList& commands();
+    bool addForAllLayers(ClOption option);
+    bool checkForAllLayers(ClOption& option);
 };
 
 /* ############# CL COMMAND ############# */
 
 class ClCommand : public CommandFunc_, public ArgFunc_ {
-   private:
+private:
     void init_(
-        const string& name, const ClOptionList& options,
-        const ClCommandList& commands
-    );
+        const string& name, const ClOptionPtrList& options,
+        const ClCommandPtrList& commands
+        );
 
-   public:
+public:
     ClCommand(const string& name);
-    ClCommand(const string& name, const ClOptionList& options);
-    ClCommand(const string& name, const ClCommandList& commands);
+    ClCommand(const string& name, const ClOptionPtrList& options);
+    ClCommand(const string& name, const ClCommandPtrList& commands);
     ClCommand(
-        const string& name, const ClOptionList& options,
-        const ClCommandList& commands
-    );
+        const string& name, const ClOptionPtrList& options,
+        const ClCommandPtrList& commands
+        );
 };
 
 /* ############# CL PARSER ############# */
 
 class ClParser : public CommandFunc_ {
-   private:
-    string name_ = string();
-    string appVersion_;
-    ClCommandList setCommands_;
-    vector<ClPosArg> setClPosArgs_;
-    vector<ClPosArg> posArgsToSet_;
+private:
+    string name_{};
+    string appVersion_{};
+    ClCommandList setCommands_{};
+    ClPosArgPtrList posArgsToSet_{};
     void init_(
-        const ClCommandList& commands, const ClOptionList& options,
-        const vector<ClPosArg>& posArgs
-    );
-    void parse_(vector<string> args, ClCommand& clcmd);
+        const ClCommandPtrList& commands, const ClOptionPtrList& options,
+        const ClPosArgPtrList& posArgs
+        );
+    void parse_(ClStringList args, ClCommand& clcmd);
     bool addForAll_(const ClOption& option, ClCommand& clcmd);
 
-   public:
+public:
     ClParser();
-    ClParser(const ClCommandList& commands);
-    ClParser(const ClOptionList& options);
-    ClParser(const vector<ClPosArg>& posArgs);
+    ClParser(const ClCommandPtrList& commands);
+    ClParser(const ClOptionPtrList& options);
+    ClParser(const ClPosArgPtrList& posArgs);
     ClParser(
-        const ClCommandList& commands, const ClOptionList& options,
-        const vector<ClPosArg>& posArgs
-    );
+        const ClCommandPtrList& commands, const ClOptionPtrList& options,
+        const ClPosArgPtrList& posArgs
+        );
     void parse(int& argc, char* argv[]);
     bool addHelpOption();
-    bool addForAll(const ClOption& option);
     bool addVersionOption();
     void addAppName(const string& name);
     void showVersion();
