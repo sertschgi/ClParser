@@ -9,9 +9,11 @@ using namespace std;
 
 /* ############# HELP FUNCTIONS ############# */
 
-static string join(ClStringList vec) {
+static string join(ClStringList vec)
+{
     string result;
-    for (string &piece : vec) {
+    for (string &piece : vec)
+    {
         if (result != "") result += ", ";
 
         result += piece;
@@ -21,8 +23,10 @@ static string join(ClStringList vec) {
 
 template <class T>
 static bool sameNameOfObjInVec(const T object, const vector<T> &objects) {
-    for (T obj : objects) {
-        if constexpr (is_pointer<T>::value) {
+    for (T obj : objects)
+    {
+        if constexpr (is_pointer<T>::value)
+        {
             if (obj->name() == object->name()) return true;
         } else {
             if (obj.name() == object.name()) return true;
@@ -32,16 +36,19 @@ static bool sameNameOfObjInVec(const T object, const vector<T> &objects) {
 }
 
 template <class T>
-static bool addObjToVec(const T object, vector<T> &objects) {
+static bool addObjToVec(const T object, vector<T> &objects)
+{
     if (sameNameOfObjInVec<T>(object, objects)) return false;
     objects.push_back(object);
     return true;
 }
 
 template <class T>
-static size_t addVecToVec(const vector<T> &objVec0, vector<T> &objVec1) {
+static size_t addVecToVec(const vector<T> &objVec0, vector<T> &objVec1)
+{
     size_t value = 0;
-    for (T arg : objVec0) {
+    for (T arg : objVec0)
+    {
         if (addObjToVec<T>(arg, objVec1)) ++value;
     }
     return value;
@@ -58,7 +65,8 @@ static size_t addObjectsToVecAsPtr(
 }
 
 template <class T>
-static size_t addVecToVecAsPtr(const vector<T> &vecFrom, vector<T *> &vecTo) {
+static size_t addVecToVecAsPtr(const vector<T> &vecFrom, vector<T *> &vecTo)
+{
     size_t skipped = 0;
     for (const T obj : vecFrom)
         if (!addObjToVec<T *>(&obj, vecTo)) ++skipped;
@@ -66,17 +74,21 @@ static size_t addVecToVecAsPtr(const vector<T> &vecFrom, vector<T *> &vecTo) {
 }
 
 template <class T>
-static void createGrid(string &str, const vector<T> &args) {
-    for (T arg : args) {
+static void createGrid(string &str, const vector<T> &args)
+{
+    for (T arg : args)
+    {
         str += join(arg.flags()) + "  |  " + arg.name() + "  |  " + arg.desc() +
                "\n";
     }
 }
 
 template <class T>
-static ClStringList unwrapName(vector<T> args) {
+static ClStringList unwrapName(vector<T> args)
+{
     ClStringList vec;
-    for (T arg : args) {
+    for (T arg : args)
+    {
         vec.push_back(arg->name());
     }
     return vec;
@@ -84,19 +96,23 @@ static ClStringList unwrapName(vector<T> args) {
 
 /* ############# GEN FUNC ############# */
 
-void GenFunc_::addDescription(const string &desc) {
+void GenFunc_::addDescription(const string &desc)
+{
     this->desc_ = desc;
 }
-const string &GenFunc_::name() const {
+const string &GenFunc_::name() const
+{
     return this->name_;
 }
-const string &GenFunc_::desc() {
+const string &GenFunc_::desc()
+{
     return this->desc_;
 }
 
 /* ############# ARG FUNC ############# */
 
-void ArgFunc_::setIsSet(bool value) {
+void ArgFunc_::setIsSet(bool value)
+{
     this->isSet_ = value;
 }
 bool ArgFunc_::isSet() {
@@ -105,12 +121,14 @@ bool ArgFunc_::isSet() {
 
 /* ############# CL POSARG ############# */
 
-ClPosArg::ClPosArg(const string &name, bool required) {
+ClPosArg::ClPosArg(const string &name, bool required)
+{
     this->name_ = name;
     this->required_ = required;
 }
 
-ClPosArg::ClPosArg(const string &name, const string &defValue) {
+ClPosArg::ClPosArg(const string &name, const string &defValue)
+{
     this->name_ = name;
     this->value_ = defValue;
     this->required_ = false;
@@ -121,30 +139,41 @@ string ClPosArg::value() {
     return this->value_;
 }
 
-void ClPosArg::setValue(const string &value) {
+const char * ClPosArg::cvalue()
+{
+    return this->value_.c_str();
+}
+
+void ClPosArg::setValue(const string &value)
+{
     this->setIsSet();
     this->value_ = value;
 }
 
-void ClPosArg::setRequired(bool value) {
+void ClPosArg::setRequired(bool value)
+{
     this->required_ = value;
 }
 
-bool ClPosArg::isRequired() const {
+bool ClPosArg::isRequired() const
+{
     return this->required_;
 }
 
 /* ############# POSARG FUNC ############# */
 
-const ClPosArgPtrList &PosArgFunc_::posArgs() {
+const ClPosArgPtrList &PosArgFunc_::posArgs()
+{
     return posArgs_;
 }
 
-bool PosArgFunc_::addPosArgument(ClPosArg &posArg) {
+bool PosArgFunc_::addPosArgument(ClPosArg &posArg)
+{
     return addObjToVec<ClPosArg *>(&posArg, this->posArgs_);
 }
 
-bool PosArgFunc_::addPosArguments(const ClPosArgPtrList &posArgs) {
+bool PosArgFunc_::addPosArguments(const ClPosArgPtrList &posArgs)
+{
     return addVecToVec<ClPosArg *>(posArgs, this->posArgs_);
 }
 
@@ -160,8 +189,10 @@ void ClOption::init_(
     this->addPosArguments(posArgs);
 }
 
-void ClOption::addFlag(const string &flag) {
-    if (flag.substr(0, 2) == "--" || flag.substr(0, 1) == "-") {
+void ClOption::addFlag(const string &flag)
+{
+    if (flag.substr(0, 2) == "--" || flag.substr(0, 1) == "-")
+    {
         this->flags_.push_back(flag);
         return;
     }
@@ -172,8 +203,10 @@ void ClOption::addFlag(const string &flag) {
     this->flags_.push_back("-" + flag);
 }
 
-void ClOption::addFlags(const ClStringList &flags) {
-    for (const string &flag : flags) {
+void ClOption::addFlags(const ClStringList &flags)
+{
+    for (const string &flag : flags)
+    {
         this->addFlag(flag);
     }
 }
@@ -191,35 +224,42 @@ ClOption::ClOption(
     this->init_(name, flags, description, posArgs);
 }
 
-const ClStringList &ClOption::flags() {
+const ClStringList &ClOption::flags()
+{
     return this->flags_;
 }
 
 /* ############# OPTION FUNC ############# */
 
-const ClOptionPtrList &OptionFunc_::options() {
+const ClOptionPtrList &OptionFunc_::options()
+{
     return this->options_;
 }
 
-const ClOptionList &OptionFunc_::ownOptions() {
+const ClOptionList &OptionFunc_::ownOptions()
+{
     return this->ownOptions_;
 }
 
-bool OptionFunc_::addOption(ClOption &option) {
+bool OptionFunc_::addOption(ClOption &option)
+{
     return addObjToVec<ClOption *>(&option, this->options_);
 }
 
-bool OptionFunc_::addOwnOption(ClOption option) {
+bool OptionFunc_::addOwnOption(ClOption option)
+{
     bool notSkipped = addObjToVec<ClOption>(option, this->ownOptions_);
     return addObjToVec<ClOption *>(&this->ownOptions_.back(), this->options_) ||
            notSkipped;
 }
 
-bool OptionFunc_::addOptions(const ClOptionPtrList &options) {
+bool OptionFunc_::addOptions(const ClOptionPtrList &options)
+{
     return addVecToVec<ClOption *>(options, this->options_);
 }
 
-bool OptionFunc_::addOwnOptions(ClOptionList options) {
+bool OptionFunc_::addOwnOptions(ClOptionList options)
+{
     bool notSkipped = addVecToVec<ClOption>(options, this->ownOptions_);
     return addObjectsToVecAsPtr(
                this->ownOptions_.end() - options.size(),
@@ -239,14 +279,17 @@ void ClCommand::init_(
     this->addCommands(commands);
 }
 
-ClCommand::ClCommand(const string &name) {
+ClCommand::ClCommand(const string &name)
+{
     this->init_(name, {}, {});
 }
-ClCommand::ClCommand(const string &name, const ClOptionPtrList &options) {
+ClCommand::ClCommand(const string &name, const ClOptionPtrList &options)
+{
     this->init_(name, options, {});
 }
 
-ClCommand::ClCommand(const string &name, const ClCommandPtrList &commands) {
+ClCommand::ClCommand(const string &name, const ClCommandPtrList &commands)
+{
     this->init_(name, {}, commands);
 }
 
@@ -259,28 +302,33 @@ ClCommand::ClCommand(
 
 /* ############# COMMAND FUNC ############# */
 
-bool CommandFunc_::addCommand(ClCommand &command) {
+bool CommandFunc_::addCommand(ClCommand &command)
+{
     return addObjToVec<ClCommand *>(&command, this->commands_);
 }
 
-bool CommandFunc_::addCommands(const ClCommandPtrList &commands) {
+bool CommandFunc_::addCommands(const ClCommandPtrList &commands)
+{
     return addVecToVec<ClCommand *>(commands, this->commands_);
 }
 
-bool CommandFunc_::addForAllLayers(ClOption option) {
+bool CommandFunc_::addForAllLayers(ClOption option)
+{
     if (!this->addOwnOption(option)) return false;
     for (ClCommand *cmd : this->commands_) cmd->addForAllLayers(option);
     return true;
 }
 
-bool CommandFunc_::checkForAllLayers(ClOption &option) {
+bool CommandFunc_::checkForAllLayers(ClOption &option)
+{
     for (ClOption *opt : this->options_)
         if (opt->name() == option.name()) return true;
     for (ClCommand *cmd : this->commands_) cmd->checkForAllLayers(option);
     return false;
 }
 
-string CommandFunc_::getHelp() {
+string CommandFunc_::getHelp()
+{
     string helpstr = "help:\n";
     if (!this->desc_.empty()) {
         helpstr += this->desc_ + "\n";
@@ -298,16 +346,19 @@ string CommandFunc_::getHelp() {
     return helpstr;
 }
 
-void CommandFunc_::showHelp() {
+void CommandFunc_::showHelp()
+{
     cout << this->getHelp();
 }
 
-void CommandFunc_::showHelp(int exitCode) {
+void CommandFunc_::showHelp(int exitCode)
+{
     this->showHelp();
     exit(exitCode);
 }
 
-const ClCommandPtrList &CommandFunc_::commands() {
+const ClCommandPtrList &CommandFunc_::commands()
+{
     return this->commands_;
 }
 
@@ -323,13 +374,16 @@ void ClParser::init_(
 }
 
 ClParser::ClParser() = default;
-ClParser::ClParser(const ClCommandPtrList &commands) {
+ClParser::ClParser(const ClCommandPtrList &commands)
+{
     this->init_(commands, {}, {});
 }
-ClParser::ClParser(const ClOptionPtrList &options) {
+ClParser::ClParser(const ClOptionPtrList &options)
+{
     this->init_({}, options, {});
 }
-ClParser::ClParser(const ClPosArgPtrList &posArgs) {
+ClParser::ClParser(const ClPosArgPtrList &posArgs)
+{
     this->init_({}, {}, posArgs);
 }
 ClParser::ClParser(
@@ -406,40 +460,49 @@ void ClParser::parse_(ClStringList& args, ClCommand &clcmd) {
     checkClPosInOpt(clcmd.options());
 }
 
-void ClParser::parse(int &argc, char *argv[]) {
+void ClParser::parse(int &argc, char *argv[])
+{
     ClStringList args(argv + 1, argv + argc);
     ClCommand cmd({}, this->options_, this->commands_);
     this->parse_(args, cmd);
     this->options_ = cmd.options();
     this->commands_ = cmd.commands();
 
-    if (!this->posArgsToSet_.empty()) {
+    if (!this->posArgsToSet_.empty())
         throw NotEnoughArgumentsError(this->posArgsToSet_.at(0)->name());
-    }
 
-    for (ClOption *option : this->options_) {
-        if (option->name() == "help") {
-            if (this->checkForAllLayers(*option)) showHelp(1);
-        } else if (option->name() == "version") {
+    for (ClOption *option : this->options_)
+    {
+        if (option->name() == "help")
+        {
+            if (this->checkForAllLayers(*option))
+                showHelp(1);
+        }
+        else if (option->name() == "version")
+        {
             if (this->checkForAllLayers(*option)) showVersion();
         }
     }
 }
 
-bool ClParser::addHelpOption() {
+bool ClParser::addHelpOption()
+{
     return this->addForAllLayers({ "help", { "-h", "--help" }, "shows help." });
 }
 
-bool ClParser::addVersionOption() {
+bool ClParser::addVersionOption()
+{
     return this->addForAllLayers(
         { "version", { "-v", "--version" }, "shows version." }
     );
 }
 
-void ClParser::showVersion() {
+void ClParser::showVersion()
+{
     cout << this->name() << appVersion_;
 }
 
-void ClParser::addAppName(const string &name) {
+void ClParser::addAppName(const string &name)
+{
     this->name_ = name;
 }

@@ -76,6 +76,7 @@ class ClPosArg : public ArgFunc_, public GenFunc_ {
     explicit ClPosArg(const string& name, bool required = false);
     ClPosArg(const string& name, const string& defValue);
     string value();
+    const char * cvalue();
     void setValue(const string& value);
     void setRequired(bool value = true);
     bool isRequired() const;
