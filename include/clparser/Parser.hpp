@@ -6,6 +6,7 @@
 #include <numeric>
 #include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
 
 using namespace std;
@@ -17,20 +18,22 @@ class NotEnoughArgumentsError : public std::exception {
     string message {};
 
    public:
-    NotEnoughArgumentsError(string msg) : message(msg) {}
-    const char* what() {
-        return (string("Not enough arguments on ") + message).c_str();
+    explicit NotEnoughArgumentsError(const string& msg) {this->message = "Not enough arguments on " + msg;}
+    const char * what() const noexcept override
+    {
+        return this->message.c_str();
     }
 };
 
-class OptionRequiredError : public std::exception {
+class PositionalArgumentRequiredError : public std::exception {
    private:
     string message {};
 
    public:
-    OptionRequiredError(string msg) : message(msg) {}
-    const char* what() {
-        return (message + " option required!").c_str();
+    explicit PositionalArgumentRequiredError(const string& msg) {this->message = msg + " option required!";}
+    const char * what() const noexcept override
+    {
+        return this->message.c_str();
     }
 };
 
@@ -67,11 +70,15 @@ class ArgFunc_ {
 class ClPosArg : public ArgFunc_, public GenFunc_ {
    protected:
     string value_ {};
+    bool required_ {};
 
    public:
-    ClPosArg(const string& name, const string& defValue = string());
-    const string value();
+    explicit ClPosArg(const string& name, bool required = false);
+    ClPosArg(const string& name, const string& defValue);
+    string value();
     void setValue(const string& value);
+    void setRequired(bool value = true);
+    bool isRequired() const;
 };
 
 /* ############# CL POSARG LIST ############# */
@@ -95,30 +102,25 @@ class PosArgFunc_ {
 
 class ClOption : public PosArgFunc_, public GenFunc_, public ArgFunc_ {
    private:
-    bool required_ {};
     ClStringList flags_ {};
     void init_(
         const string& name, const ClStringList& flags,
-        const string& description, const ClPosArgPtrList& posArgs,
-        bool required = false
+        const string& description, const ClPosArgPtrList& posArgs
     );
 
    public:
     ClOption(
         const string& name, const ClStringList& flags,
-        const string& description, bool required = false
+        const string& description
     );
     ClOption(
         const string& name, const ClStringList& flags,
-        const string& description, const ClPosArgPtrList& posArgs,
-        bool required = false
+        const string& description, const ClPosArgPtrList& posArgs
     );
 
     void addFlag(const string& flag);
     void addFlags(const ClStringList& flags);
     const ClStringList& flags();
-    void setRequired(bool value = true);
-    const bool isRequired();
 };
 
 /* ############# CL OPTION LIST ############# */
@@ -178,7 +180,7 @@ class ClCommand : public CommandFunc_, public ArgFunc_ {
     );
 
    public:
-    ClCommand(const string& name);
+    explicit ClCommand(const string& name);
     ClCommand(const string& name, const ClOptionPtrList& options);
     ClCommand(const string& name, const ClCommandPtrList& commands);
     ClCommand(
@@ -199,14 +201,13 @@ class ClParser : public CommandFunc_ {
         const ClCommandPtrList& commands, const ClOptionPtrList& options,
         const ClPosArgPtrList& posArgs
     );
-    void parse_(ClStringList args, ClCommand& clcmd);
-    bool addForAll_(const ClOption& option, ClCommand& clcmd);
+    void parse_(ClStringList& args, ClCommand& clcmd);
 
    public:
     ClParser();
-    ClParser(const ClCommandPtrList& commands);
-    ClParser(const ClOptionPtrList& options);
-    ClParser(const ClPosArgPtrList& posArgs);
+    explicit ClParser(const ClCommandPtrList& commands);
+    explicit ClParser(const ClOptionPtrList& options);
+    explicit ClParser(const ClPosArgPtrList& posArgs);
     ClParser(
         const ClCommandPtrList& commands, const ClOptionPtrList& options,
         const ClPosArgPtrList& posArgs

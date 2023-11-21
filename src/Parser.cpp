@@ -1,9 +1,7 @@
 #include "../include/clparser/Parser.hpp"
 
-#include <functional>
 #include <iostream>
 #include <numeric>
-#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -12,7 +10,7 @@ using namespace std;
 /* ############# HELP FUNCTIONS ############# */
 
 static string join(ClStringList vec) {
-    string result = "";
+    string result;
     for (string &piece : vec) {
         if (result != "") result += ", ";
 
@@ -107,17 +105,33 @@ bool ArgFunc_::isSet() {
 
 /* ############# CL POSARG ############# */
 
+ClPosArg::ClPosArg(const string &name, bool required) {
+    this->name_ = name;
+    this->required_ = required;
+}
+
 ClPosArg::ClPosArg(const string &name, const string &defValue) {
     this->name_ = name;
     this->value_ = defValue;
+    this->required_ = false;
 }
 
-const string ClPosArg::value() {
+
+string ClPosArg::value() {
     return this->value_;
 }
 
 void ClPosArg::setValue(const string &value) {
+    this->setIsSet();
     this->value_ = value;
+}
+
+void ClPosArg::setRequired(bool value) {
+    this->required_ = value;
+}
+
+bool ClPosArg::isRequired() const {
+    return this->required_;
 }
 
 /* ############# POSARG FUNC ############# */
@@ -138,13 +152,12 @@ bool PosArgFunc_::addPosArguments(const ClPosArgPtrList &posArgs) {
 
 void ClOption::init_(
     const string &name, const ClStringList &flags, const string &description,
-    const ClPosArgPtrList &posArgs, bool required
+    const ClPosArgPtrList &posArgs
 ) {
     this->name_ = name;
     this->addFlags(flags);
     this->desc_ = description;
     this->addPosArguments(posArgs);
-    this->required_ = required;
 }
 
 void ClOption::addFlag(const string &flag) {
@@ -166,30 +179,20 @@ void ClOption::addFlags(const ClStringList &flags) {
 }
 
 ClOption::ClOption(
-    const string &name, const ClStringList &flags, const string &description,
-    bool required
+    const string &name, const ClStringList &flags, const string &description
 ) {
-    this->init_(name, flags, description, {}, required);
+    this->init_(name, flags, description, {});
 }
 
 ClOption::ClOption(
     const string &name, const ClStringList &flags, const string &description,
-    const ClPosArgPtrList &posArgs, bool required
+    const ClPosArgPtrList &posArgs
 ) {
-    this->init_(name, flags, description, posArgs, required);
+    this->init_(name, flags, description, posArgs);
 }
 
 const ClStringList &ClOption::flags() {
     return this->flags_;
-}
-
-void ClOption::setRequired(bool value) {
-    this->required_ = value;
-}
-
-const bool ClOption::isRequired() {
-    cout << this->required_;
-    return this->required_;
 }
 
 /* ############# OPTION FUNC ############# */
@@ -279,7 +282,7 @@ bool CommandFunc_::checkForAllLayers(ClOption &option) {
 
 string CommandFunc_::getHelp() {
     string helpstr = "help:\n";
-    if (this->desc_.size() > 0) {
+    if (!this->desc_.empty()) {
         helpstr += this->desc_ + "\n";
     }
     helpstr += "usage:" + this->name_ + join(unwrapName(this->posArgs_)) +
@@ -319,7 +322,7 @@ void ClParser::init_(
     addVecToVec<ClPosArg *>(posArgs, this->posArgs_);
 }
 
-ClParser::ClParser() {}
+ClParser::ClParser() = default;
 ClParser::ClParser(const ClCommandPtrList &commands) {
     this->init_(commands, {}, {});
 }
@@ -336,40 +339,71 @@ ClParser::ClParser(
     this->init_(commands, options, posArgs);
 }
 
-void ClParser::parse_(ClStringList args, ClCommand &clcmd) {
-    for (string &arg : args) {
-        for (ClOption *opt : clcmd.options()) {
-            for (const string &sm : opt->flags()) {
-                if (arg == sm) {
-                    opt->setIsSet(true);
-                    addVecToVec<ClPosArg *>(
-                        opt->posArgs(), this->posArgsToSet_
-                    );
-                    args.erase(args.begin());
-                    this->parse_(args, clcmd);
-                    return;
-                }
-            }
-        }
-        for (ClCommand *cmd : clcmd.commands()) {
-            if (arg == cmd->name()) {
-                for (ClOption *opt : clcmd.options()) {
-                    cout << "required: ";
-                    cout << opt->isRequired();
-                    if (opt->isRequired() && !opt->isSet()) {
-                        throw OptionRequiredError(opt->name());
-                    }
-                }
-                cmd->setIsSet(true);
+void checkClPosArgs(const ClPosArgPtrList& posArgs)
+{
+    for (ClPosArg * posArg : posArgs)
+    {
+        if (posArg->isRequired() && !posArg->isSet())
+            throw PositionalArgumentRequiredError(posArg->name());
+    }
+}
+
+void checkClPosInOpt(const ClOptionPtrList& options)
+{
+    for (ClOption * opt : options)
+    {
+        checkClPosArgs(opt->posArgs());
+    }
+}
+
+void addClPosArgToSet(const ClPosArgPtrList& posArgsFrom, ClPosArgPtrList& posArgsTo)
+{
+    checkClPosArgs(posArgsTo);
+    posArgsTo.clear();
+    addVecToVec<ClPosArg *>(posArgsFrom, posArgsTo);
+}
+
+void ClParser::parse_(ClStringList& args, ClCommand &clcmd) {
+    string arg = args[0];
+
+    for (ClOption * opt : clcmd.options())
+    {
+        for (const string &sm : opt->flags())
+        {
+            if (arg == sm)
+            {
+                opt->setIsSet(true);
+                addClPosArgToSet(opt->posArgs(), this->posArgsToSet_);
                 args.erase(args.begin());
-                this->parse_(args, *cmd);
+                this->parse_(args, clcmd);
                 return;
             }
         }
-        this->posArgsToSet_.front()->setValue(arg);
-        this->posArgsToSet_.front()->setIsSet();
-        this->posArgsToSet_.erase(posArgsToSet_.begin());
+
     }
+
+    for (ClCommand *cmd : clcmd.commands())
+    {
+        if (arg == cmd->name())
+        {
+            checkClPosInOpt(clcmd.options());
+            addClPosArgToSet(cmd->posArgs(), this->posArgsToSet_);
+            cmd->setIsSet(true);
+            args.erase(args.begin());
+            this->parse_(args, *cmd);
+            return;
+        }
+    }
+
+    if (!posArgsToSet_.empty())
+    {
+        this->posArgsToSet_.front()->setValue(arg);
+        this->posArgsToSet_.erase(posArgsToSet_.begin());
+        args.erase(args.begin());
+        this->parse_(args, clcmd);
+    }
+
+    checkClPosInOpt(clcmd.options());
 }
 
 void ClParser::parse(int &argc, char *argv[]) {
@@ -379,7 +413,7 @@ void ClParser::parse(int &argc, char *argv[]) {
     this->options_ = cmd.options();
     this->commands_ = cmd.commands();
 
-    if (this->posArgsToSet_.size() > 0) {
+    if (!this->posArgsToSet_.empty()) {
         throw NotEnoughArgumentsError(this->posArgsToSet_.at(0)->name());
     }
 
@@ -390,7 +424,6 @@ void ClParser::parse(int &argc, char *argv[]) {
             if (this->checkForAllLayers(*option)) showVersion();
         }
     }
-    return;
 }
 
 bool ClParser::addHelpOption() {
