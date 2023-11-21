@@ -18,5 +18,4 @@ install(TARGETS ClParser
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)
 
-
 install(FILES include/clparser/Parser.hpp DESTINATION include/clparser)
