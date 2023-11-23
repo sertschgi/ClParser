@@ -272,32 +272,33 @@ bool OptionFunc_::addOwnOptions(ClOptionList options)
 
 void ClCommand::init_(
     const string &name, const ClOptionPtrList &options,
-    const ClCommandPtrList &commands
+    const ClCommandPtrList &commands, const string& description
 ) {
     this->name_ = name;
+    this->desc_ = description;
     this->addOptions(options);
     this->addCommands(commands);
 }
 
-ClCommand::ClCommand(const string &name)
+ClCommand::ClCommand(const string &name, const string& description)
 {
-    this->init_(name, {}, {});
+    this->init_(name, {}, {}, description);
 }
-ClCommand::ClCommand(const string &name, const ClOptionPtrList &options)
+ClCommand::ClCommand(const string &name, const ClOptionPtrList &options, const string& description)
 {
-    this->init_(name, options, {});
+    this->init_(name, options, {}, description);
 }
 
-ClCommand::ClCommand(const string &name, const ClCommandPtrList &commands)
+ClCommand::ClCommand(const string &name, const ClCommandPtrList &commands, const string& description)
 {
-    this->init_(name, {}, commands);
+    this->init_(name, {}, commands, description);
 }
 
 ClCommand::ClCommand(
     const string &name, const ClOptionPtrList &options,
-    const ClCommandPtrList &commands
+    const ClCommandPtrList &commands, const string& description
 ) {
-    this->init_(name, options, commands);
+    this->init_(name, options, commands, description);
 }
 
 /* ############# COMMAND FUNC ############# */
@@ -463,7 +464,7 @@ void ClParser::parse_(ClStringList& args, ClCommand &clcmd) {
 void ClParser::parse(int &argc, char *argv[])
 {
     ClStringList args(argv + 1, argv + argc);
-    ClCommand cmd({}, this->options_, this->commands_);
+    ClCommand cmd({}, this->options_, this->commands_, {});
     this->parse_(args, cmd);
     this->options_ = cmd.options();
     this->commands_ = cmd.commands();

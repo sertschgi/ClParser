@@ -177,16 +177,16 @@ class ClCommand : public CommandFunc_, public ArgFunc_ {
    private:
     void init_(
         const string& name, const ClOptionPtrList& options,
-        const ClCommandPtrList& commands
+        const ClCommandPtrList& commands, const string& description
     );
 
    public:
-    explicit ClCommand(const string& name);
-    ClCommand(const string& name, const ClOptionPtrList& options);
-    ClCommand(const string& name, const ClCommandPtrList& commands);
+    ClCommand(const string& name, const string& description);
+    ClCommand(const string& name, const ClOptionPtrList& options, const string& description);
+    ClCommand(const string& name, const ClCommandPtrList& commands, const string& description);
     ClCommand(
         const string& name, const ClOptionPtrList& options,
-        const ClCommandPtrList& commands
+        const ClCommandPtrList& commands, const string& description
     );
 };
 

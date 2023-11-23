@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
     );
     ClCommand createDatasetCommand(
         "dataset", { &datasetNameOption, &datasetLabelOption,
-                     &datsetLabelPathOption, &datasetImagePathOption }
+                     &datsetLabelPathOption, &datasetImagePathOption }, {}
     );
 
     ClPosArg profileNamePosArg("profile-name", true);
@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
 
     ClCommand createProfileCommand(
         "profile",
-        { &profileNameOption, &profileFrameworkOption, &profileScopeOption }
+        { &profileNameOption, &profileFrameworkOption, &profileScopeOption }, {}
     );
 
     ClPosArg projectNamePosArg("project-name", true);
@@ -73,7 +73,7 @@ int main(int argc, char* argv[]) {
     );
     ClCommand createProjectCommand(
         "project",
-        { &projectNameOption, &projectProfileOption, &projectDatasetOption }
+        { &projectNameOption, &projectProfileOption, &projectDatasetOption }, {}
     );
 
     ClPosArg modelNamePosArg("model-name", true);
@@ -95,7 +95,7 @@ int main(int argc, char* argv[]) {
     );
 
     ClCommand createModelCommand(
-        "model", { &modelNameOption, &modelProjectOption, &modelModelOption }
+        "model", { &modelNameOption, &modelProjectOption, &modelModelOption }, {}
     );
 
     ClCommandPtrList createCommands = { &createDatasetCommand,
@@ -103,10 +103,12 @@ int main(int argc, char* argv[]) {
                                         &createProjectCommand,
                                         &createModelCommand };
 
-    ClCommand createCommand(std::string("create"), createCommands);
+    ClCommand createCommand(std::string("create"), createCommands, {});
 
     ClParser parser({ &createCommand });
     parser.addAppName("0.0.1");
 
     parser.parse(argc, argv);
+
+    std::cout << modelModelPosArg.cvalue();
 }
