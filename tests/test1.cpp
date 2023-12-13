@@ -1,36 +1,39 @@
-#include "../include/clparser/Parser.hpp"
+#include "Clparser/Parser.hpp"
 
 #include <iostream>
 
 int main(int argc, char* argv[]) {
+
     ClPosArg datasetNamePosArg("dataset-name", true);
     ClOption datasetNameOption(
         "dataset-name", { "n", "name" }, "Specify the name of your dataset.",
-        { &datasetNamePosArg }
+        { datasetNamePosArg }
     );
 
     ClPosArg datasetLabelPosArg("dataset-label", true);
     ClOption datasetLabelOption(
         "dataset-label", { "l", "labels" },
-        "Specify the path of your labelmap.pbtxt", { &datasetLabelPosArg }
+        "Specify the path of your labelmap.pbtxt", { datasetLabelPosArg }
     );
 
     ClPosArg datsetLabelPathPosArg("dataset-label-path", true);
     ClOption datsetLabelPathOption(
         "dataset-label-path", { "a", "labels_path" }, "Specify the label path.", 
-        { &datsetLabelPathPosArg }
+        { datsetLabelPathPosArg }
     );
 
     ClPosArg datasetImagePathPosArg("dataset-image-path", true);
     ClOption datasetImagePathOption(
         "dataset-image-path", { "m", "images_path" },
-        "Specify the images path.", { &datasetImagePathPosArg }
-    );
-    ClCommand createDatasetCommand(
-        "dataset", { &datasetNameOption, &datasetLabelOption,
-                     &datsetLabelPathOption, &datasetImagePathOption }, {}
+        "Specify the images path.", { datasetImagePathPosArg }
     );
 
+    ClCommand createDatasetCommand(
+        "dataset", { datasetNameOption, datasetLabelOption,
+                     datsetLabelPathOption, datasetImagePathOption }, {}
+    );
+
+    /*
     ClPosArg profileNamePosArg("profile-name", true);
     ClOption profileNameOption(
         "profile-name", { "n", "name" }, "Specify the name of your profile.",
@@ -102,13 +105,17 @@ int main(int argc, char* argv[]) {
                                         &createProfileCommand,
                                         &createProjectCommand,
                                         &createModelCommand };
+    */
+    ClCommand createCommand("create", {createDatasetCommand}, "creates stuff");
 
-    ClCommand createCommand(std::string("create"), createCommands, {});
+    ClCommandList test = { createCommand };
+    ClCommandPtrList test1 = test.toPtrList();
 
-    ClParser parser({ &createCommand });
-    parser.addAppName("0.0.1");
+    ClParser parser({ createCommand } );
+    parser.addAppName("test1");
+    parser.addAppVersion("0.1-test");
+    parser.addHelpOption();
+    parser.addVersionOption();
 
     parser.parse(argc, argv);
-
-    std::cout << modelModelPosArg.cvalue();
 }
