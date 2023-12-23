@@ -5,9 +5,11 @@
 int main(int argc, char* argv[]) {
 
     ClPosArg datasetNamePosArg("dataset-name", true);
+    ClPosArgPtrList posarglist = { datasetNamePosArg };
+
     ClOption datasetNameOption(
         "dataset-name", { "n", "name" }, "Specify the name of your dataset.",
-        { datasetNamePosArg }
+        posarglist
     );
 
     ClPosArg datasetLabelPosArg("dataset-label", true);
@@ -28,9 +30,11 @@ int main(int argc, char* argv[]) {
         "Specify the images path.", { datasetImagePathPosArg }
     );
 
+    ClOptionPtrList optlist = { datasetNameOption, datasetLabelOption,
+                             datsetLabelPathOption, datasetImagePathOption };
+
     ClCommand createDatasetCommand(
-        "dataset", { datasetNameOption, datasetLabelOption,
-                     datsetLabelPathOption, datasetImagePathOption }, {}
+        "dataset", optlist, "creates a Dataset"
     );
 
     /*
@@ -106,16 +110,24 @@ int main(int argc, char* argv[]) {
                                         &createProjectCommand,
                                         &createModelCommand };
     */
-    ClCommand createCommand("create", {createDatasetCommand}, "creates stuff");
+    ClCommandPtrList cmdlist = { createDatasetCommand };
+    ClCommand createCommand("create", cmdlist, "creates stuff");
 
     ClCommandList test = { createCommand };
     ClCommandPtrList test1 = test.toPtrList();
 
-    ClParser parser({ createCommand } );
+    ClCommandPtrList bcmdlist = {createCommand};
+
+    ClParser parser(bcmdlist);
     parser.addAppName("test1");
     parser.addAppVersion("0.1-test");
     parser.addHelpOption();
     parser.addVersionOption();
 
     parser.parse(argc, argv);
+
+    if (datasetNamePosArg.isSet())
+        cout << datasetNamePosArg.cvalue();
+
+    cout << "test";
 }

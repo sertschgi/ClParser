@@ -28,10 +28,6 @@ public:
             const string& name, const ClStringList& flags,
             const string& description, const ClPosArgPtrList& posArgs, bool dodgeRequired = false
     );
-    ClOption(
-            const string& name, const ClStringList& flags,
-            const string& description, const ClPosArgList& posArgs, bool dodgeRequired = false
-    ) : ClOption(name, flags, description, posArgs.toPtrList(), dodgeRequired) {};
 
 
     void addFlag(const string& flag);

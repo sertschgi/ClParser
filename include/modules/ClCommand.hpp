@@ -24,12 +24,13 @@ public:
             const string& name, const ClOptionPtrList& options,
             const ClCommandPtrList& commands, const string& description
     );
+    /*
     ClCommand(const string& name, const ClOptionList& options, const string& description) : ClCommand(name, options.toPtrList(), description) {};
     ClCommand(const string& name, const ClCommandList& commands, const string& description) : ClCommand(name, commands.toPtrList(), description) {};
     ClCommand(
             const string& name, const ClOptionList& options,
             const ClCommandList& commands, const string& description
-    ) : ClCommand(name, options.toPtrList(), commands.toPtrList(), description) {};
+    ) : ClCommand(name, options.toPtrList(), commands.toPtrList(), description) {}; */
 };
 
 #endif //CLPARSER_CLCOMMAND_HPP

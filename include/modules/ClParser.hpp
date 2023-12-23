@@ -29,14 +29,14 @@ public:
     ClParser(
             const ClCommandPtrList& commands, const ClOptionPtrList& options,
             const ClPosArgPtrList& posArgs
-    );
+    );/*
     explicit ClParser(const ClCommandList& commands) : ClParser(commands.toPtrList()) {};
     explicit ClParser(const ClOptionList& options) : ClParser(options.toPtrList()) {};
     explicit ClParser(const ClPosArgList& posArgs) : ClParser(posArgs.toPtrList()) {};
     ClParser(
             const ClCommandList& commands, const ClOptionList& options,
             const ClPosArgList& posArgs
-    ) : ClParser(commands.toPtrList(), options.toPtrList(), posArgs.toPtrList()) {};
+    ) : ClParser(commands.toPtrList(), options.toPtrList(), posArgs.toPtrList()) {}; */
 
     void parse(int& argc, char* argv[]);
     bool addHelpOption();

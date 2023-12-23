@@ -112,7 +112,7 @@ void ClParser::parse_(ClStringList& args, ClCommand &clcmd) {
         }
     }
 
-    if (!posArgsToSet_.empty())
+    if (!this->posArgsToSet_.empty())
     {
         this->posArgsToSet_.front()->setValue(arg);
         this->posArgsToSet_.erase(posArgsToSet_.begin());

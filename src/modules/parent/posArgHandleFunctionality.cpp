@@ -16,5 +16,5 @@ bool PosArgFunc_::addPosArgument(ClPosArg &posArg)
 
 bool PosArgFunc_::addPosArguments(const ClPosArgPtrList &posArgs)
 {
-    return addVecToVec<shared_ptr<ClPosArg>>(posArgs, this->posArgs_);
+    return addVecToVec<ClPosArgPtr>(posArgs, this->posArgs_);
 }

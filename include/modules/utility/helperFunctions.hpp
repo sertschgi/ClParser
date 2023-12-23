@@ -57,7 +57,7 @@ template <class T>
 static size_t addVecToVec(const vector<T> &objVec0, vector<T> &objVec1)
 {
     size_t value = 0;
-    for (const T& arg : objVec0)
+    for (T arg : objVec0)
     {
         if (addObjToVec<T>(arg, objVec1)) ++value;
     }
