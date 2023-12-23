@@ -45,70 +45,78 @@ bool CommandFunc_::checkForAllLayers(ClOption &option)
 string CommandFunc_::getHelp()
 {
     string helpstr;
-    if (!this->desc_.empty()) {
-        helpstr += this->desc_ + "\n";
-    }
-    helpstr += "usage:" + this->name_ + join(unwrapName(this->posArgs_)) +
-               " [command] [options]\n\noptions:\n";
 
-    ClOptionList opts = this->options();
-
-    sort(opts.begin(),
-         opts.end(),
-         [](const ClOption& opt1, const ClOption& opt2)
-         {
-             return join(opt1.flags()).size() > join(opt2.flags()).size();
-         }
-    );
-
-    size_t longestOptFlagSize = join(opts[0].flags()).size();
-
-
-    sort(opts.begin(),
-         opts.end(),
-         [](const ClOption& opt1, const ClOption& opt2)
-         {
-             return opt1.name().size() > opt2.name().size();
-         }
-    );
-
-    size_t longestOptNameSize = opts[0].name().size();
-
-    for (ClOption opt : opts) {
-        helpstr += join(opt.flags())
-                   + string(longestOptFlagSize - join(opt.flags()).size(), ' ')
-                   + "  |  "
-                   + opt.name()
-                   + string(longestOptNameSize - opt.name().size(), ' ')
-                   + "  |  "
-                   + opt.desc() + "\n";
+    if (!this->desc_.empty())
+    {
+        helpstr += "purpose:\n" + this->desc_ + "\n\n";
     }
 
-    helpstr += "\ncommands:\n";
+    helpstr += "usage:\n" + this->name_ + join(unwrapName(this->posArgs_)) +
+               " [command] [options]\n";
 
-    ClCommandList commands = this->commands();
+    if (!this->options_.empty()) {
+        helpstr += "\noptions:\n";
 
-    sort(commands.begin(),
-         commands.end(),
-         [](const ClCommand& cmd1, const ClCommand& cmd2)
-         {
-             return cmd1.name().size() > cmd2.name().size();
-         }
-    );
+        ClOptionList opts = this->options();
 
-    for (ClCommand cmd : commands) {
-        size_t sizeDiff = commands[0].name().size() - cmd.name().size();
-        helpstr += cmd.name()
-                   + string(sizeDiff, ' ')
-                   +  "  |  " + cmd.desc()
-                   + "\n";
+        sort(opts.begin(),
+             opts.end(),
+             [](const ClOption &opt1, const ClOption &opt2) {
+                 return join(opt1.flags()).size() > join(opt2.flags()).size();
+             }
+        );
+
+        size_t longestOptFlagSize = join(opts[0].flags()).size();
+
+
+        sort(opts.begin(),
+             opts.end(),
+             [](const ClOption &opt1, const ClOption &opt2) {
+                 return opt1.name().size() > opt2.name().size();
+             }
+        );
+
+        size_t longestOptNameSize = opts[0].name().size();
+
+        for (ClOption opt: opts) {
+            helpstr += join(opt.flags())
+                       + string(longestOptFlagSize - join(opt.flags()).size(), ' ')
+                       + "  |  "
+                       + opt.name()
+                       + string(longestOptNameSize - opt.name().size(), ' ')
+                       + "  |  "
+                       + opt.desc() + "\n";
+        }
     }
+
+    if (!this->commands_.empty()) {
+        helpstr += "\ncommands:\n";
+
+        ClCommandList commands = this->commands();
+
+        sort(commands.begin(),
+             commands.end(),
+             [](const ClCommand &cmd1, const ClCommand &cmd2) {
+                 return cmd1.name().size() > cmd2.name().size();
+             }
+        );
+
+        for (ClCommand cmd: commands) {
+            size_t sizeDiff = commands[0].name().size() - cmd.name().size();
+            helpstr += cmd.name()
+                       + string(sizeDiff, ' ')
+                       + "  |  " + cmd.desc()
+                       + "\n";
+        }
+    }
+
     return helpstr;
 }
 
 void CommandFunc_::showHelp()
 {
     cout << this->getHelp();
+    exit(0);
 }
 
 void CommandFunc_::showHelp(int exitCode)
