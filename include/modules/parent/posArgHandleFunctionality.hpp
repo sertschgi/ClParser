@@ -12,8 +12,7 @@ protected:
 public:
     bool addPosArgument(ClPosArg& posArg);
     bool addPosArguments(const ClPosArgPtrList& posArgs);
-    bool addPosArguments(const ClPosArgList& posArgs);
-    const ClPosArgPtrList& posArgs();
+    [[nodiscard]] const ClPosArgPtrList& posArgs() const;
 };
 
 #endif //CLPARSER_POSARGHANDLEFUNCTIONALITY_HPP

@@ -32,7 +32,7 @@ template<typename T> struct is_shared_ptr<shared_ptr<T>> : std::true_type {};
 
 // checks if there is an object with the same T::name in the vector
 template <class T>
-static bool sameNameOfObjInVec(const T object, const vector<T> &objects) {
+static bool sameNameOfObjInVec(const T object, const set<T> &objects) {
     for (const T& obj : objects)
         if constexpr (is_shared_ptr<T>::value)
         {
@@ -46,15 +46,15 @@ static bool sameNameOfObjInVec(const T object, const vector<T> &objects) {
 }
 
 template <class T>
-static bool addObjToVec(T object, vector<T> &objects)
+static bool addObjToVec(T object, set<T> &objects)
 {
     if (sameNameOfObjInVec<T>(object, objects)) return false;
-    objects.emplace_back(object);
+    objects.insert(object);
     return true;
 }
 
 template <class T>
-static size_t addVecToVec(const vector<T> &objVec0, vector<T> &objVec1)
+static size_t addVecToVec(const set<T> &objVec0, set<T> &objVec1)
 {
     size_t value = 0;
     for (T arg : objVec0)
@@ -66,7 +66,7 @@ static size_t addVecToVec(const vector<T> &objVec0, vector<T> &objVec1)
 
 template <typename I>
 static size_t addObjectsToVecAsPtr(
-        vector<shared_ptr<typename I::value_type>> &vecTo, I start, I end
+        set<shared_ptr<typename I::value_type>> &vecTo, I start, I end
 ) {
     size_t skipped = 0;
     for (auto it = start; it != end; ++it)
@@ -75,14 +75,27 @@ static size_t addObjectsToVecAsPtr(
 }
 
 template <class T>
-static ClStringList unwrapName(vector<T> args)
+static ClStringList unwrapName(set<T> args)
 {
-    ClStringList vec;
+    ClStringList set;
     for (T arg : args)
     {
-        vec.push_back(arg->name());
+        set.push_back(arg->name());
     }
-    return vec;
+    return set;
 }
+
+template <class T>
+static bool longest(const T& largestObj, const T& firstObj)
+{
+    return largestObj.name().size() > firstObj.name().size();
+}
+
+template <class T>
+static bool longestFlags(const T& largestObj, const T& firstObj)
+{
+    return largestObj.flags().size() > firstObj.flags().size();
+}
+
 
 #endif //CLPARSER_HELPERFUNCTIONS_HPP

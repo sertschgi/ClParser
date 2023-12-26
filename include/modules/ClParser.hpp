@@ -43,7 +43,7 @@ public:
     bool addVersionOption();
     void addAppName(const string& name);
     void addAppVersion(const string& versionName);
-    void showVersion();
+    void showVersion() const;
 };
 
 #endif //CLPARSER_CLPARSER_HPP

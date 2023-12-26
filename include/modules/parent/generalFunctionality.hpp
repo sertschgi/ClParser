@@ -14,8 +14,16 @@ protected:
     string desc_ {};
 
 public:
+    bool operator<(const GenFunc_& other) const {
+        return this->name_ < other.name();
+    }
+
+    bool operator==(const GenFunc_& other) const {
+        return this->name_ == other.name();
+    }
+
     void addDescription(const string& desc);
-    [[nodiscard]] const string& desc();
+    [[nodiscard]] const string& desc() const;
     [[nodiscard]] const string& name() const;
 };
 

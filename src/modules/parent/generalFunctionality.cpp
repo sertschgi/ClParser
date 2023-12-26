@@ -11,7 +11,7 @@ const string &GenFunc_::name() const
 {
     return this->name_;
 }
-const string &GenFunc_::desc()
+const string &GenFunc_::desc() const
 {
     return this->desc_;
 }

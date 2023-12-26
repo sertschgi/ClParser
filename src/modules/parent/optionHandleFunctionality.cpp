@@ -9,12 +9,12 @@ ClOptionPtrList& OptionFunc_::poptions()
     return this->options_;
 }
 
-ClOptionList OptionFunc_::options()
+ClOptionList OptionFunc_::options() const
 {
     return this->options_.toObjList();
 }
 
-const ClOptionList &OptionFunc_::ownOptions()
+const ClOptionList &OptionFunc_::ownOptions() const
 {
     return this->ownOptions_;
 }
@@ -27,7 +27,8 @@ bool OptionFunc_::addOption(ClOption &option)
 bool OptionFunc_::addOwnOption(ClOption option)
 {
     bool notSkipped = addObjToVec<ClOption>(option, this->ownOptions_);
-    return addObjToVec<ClOptionPtr>(make_shared<ClOption>(this->ownOptions_.back()), this->options_) ||
+    ClOptionPtr optInOwnOpts = make_shared<ClOption>(*find(this->ownOptions_.begin(), this->ownOptions_.end(), option));
+    return addObjToVec<ClOptionPtr>(optInOwnOpts, this->options_) ||
            notSkipped;
 }
 
@@ -41,13 +42,8 @@ bool OptionFunc_::addOwnOptions(ClOptionList options)
     bool notSkipped = addVecToVec<ClOption>(options, this->ownOptions_);
     return addObjectsToVecAsPtr(
             this->options_,
-            this->ownOptions_.end() - options.size(),
+            this->ownOptions_.begin(),
             this->ownOptions_.end()
     ) ||
            notSkipped;
-}
-
-OptionFunc_::OptionFunc_()
-{
-    this->options_.reserve(30);
 }

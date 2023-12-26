@@ -21,7 +21,8 @@ void ClOption::addFlag(const string &flag)
         this->flags_.push_back(flag);
         return;
     }
-    if (!flag.size() == 1) {
+    if (flag.size() > 1)
+    {
         this->flags_.push_back("--" + flag);
         return;
     }

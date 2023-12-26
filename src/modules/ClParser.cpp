@@ -81,7 +81,7 @@ void ClParser::parse_(ClStringList& args, ClCommand &clcmd) {
     if (args.empty())
         return;
 
-    string arg = args.front();
+    string arg = *args.begin();
 
     for (ClOptionPtr opt : clcmd.poptions())
     {
@@ -114,7 +114,7 @@ void ClParser::parse_(ClStringList& args, ClCommand &clcmd) {
 
     if (!this->posArgsToSet_.empty())
     {
-        this->posArgsToSet_.front()->setValue(arg);
+        (*this->posArgsToSet_.begin())->setValue(arg);
         this->posArgsToSet_.erase(posArgsToSet_.begin());
         args.erase(args.begin());
         this->parse_(args, clcmd);
@@ -144,7 +144,7 @@ void ClParser::parse(int &argc, char *argv[])
     }
 
     if (!this->posArgsToSet_.empty())
-        throw NotEnoughArgumentsError(this->posArgsToSet_.at(0)->name());
+        throw NotEnoughArgumentsError((*this->posArgsToSet_.begin())->name());
 
 }
 
@@ -160,7 +160,7 @@ bool ClParser::addVersionOption()
     );
 }
 
-void ClParser::showVersion()
+void ClParser::showVersion() const
 {
     cout << this->name() << appVersion_;
 }

@@ -25,7 +25,7 @@ bool CommandFunc_::addForAllLayers(ClOption option)
     return true;
 }
 
-bool CommandFunc_::checkForAllLayers(ClOption &option)
+bool CommandFunc_::checkForAllLayers(ClOption &option) const
 {
     for (ClOptionPtr opt : this->options_)
     {
@@ -42,7 +42,7 @@ bool CommandFunc_::checkForAllLayers(ClOption &option)
     return false;
 }
 
-string CommandFunc_::getHelp()
+string CommandFunc_::getHelp() const
 {
     string helpstr;
 
@@ -59,24 +59,11 @@ string CommandFunc_::getHelp()
 
         ClOptionList opts = this->options();
 
-        sort(opts.begin(),
-             opts.end(),
-             [](const ClOption &opt1, const ClOption &opt2) {
-                 return join(opt1.flags()).size() > join(opt2.flags()).size();
-             }
-        );
+        ClOption longestOptFlag = *max_element(opts.begin(), opts.end(), longestFlags<ClOption>);
+        size_t longestOptFlagSize = join(longestOptFlag.flags()).size();
 
-        size_t longestOptFlagSize = join(opts[0].flags()).size();
-
-
-        sort(opts.begin(),
-             opts.end(),
-             [](const ClOption &opt1, const ClOption &opt2) {
-                 return opt1.name().size() > opt2.name().size();
-             }
-        );
-
-        size_t longestOptNameSize = opts[0].name().size();
+        ClOption longestOptName = *max_element(opts.begin(), opts.end(), longest<ClOption>);
+        size_t longestOptNameSize = longestOptName.name().size();
 
         for (ClOption opt: opts) {
             helpstr += join(opt.flags())
@@ -94,15 +81,11 @@ string CommandFunc_::getHelp()
 
         ClCommandList commands = this->commands();
 
-        sort(commands.begin(),
-             commands.end(),
-             [](const ClCommand &cmd1, const ClCommand &cmd2) {
-                 return cmd1.name().size() > cmd2.name().size();
-             }
-        );
+        ClCommand longestCmdName = *max_element(commands.begin(), commands.end(), longest<ClCommand>);
+        size_t longestCmdNameSize = longestCmdName.name().size();
 
         for (ClCommand cmd: commands) {
-            size_t sizeDiff = commands[0].name().size() - cmd.name().size();
+            size_t sizeDiff = longestCmdNameSize - cmd.name().size();
             helpstr += cmd.name()
                        + string(sizeDiff, ' ')
                        + "  |  " + cmd.desc()
@@ -113,13 +96,13 @@ string CommandFunc_::getHelp()
     return helpstr;
 }
 
-void CommandFunc_::showHelp()
+void CommandFunc_::showHelp() const
 {
     cout << this->getHelp();
     exit(0);
 }
 
-void CommandFunc_::showHelp(int exitCode)
+void CommandFunc_::showHelp(int exitCode) const
 {
     this->showHelp();
     exit(exitCode);
@@ -130,7 +113,7 @@ ClCommandPtrList& CommandFunc_::pcommands()
     return this->commands_;
 }
 
-ClCommandList CommandFunc_::commands()
+ClCommandList CommandFunc_::commands() const
 {
     return this->commands_.toObjList();
 }

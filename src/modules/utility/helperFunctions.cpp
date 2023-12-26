@@ -76,7 +76,7 @@ static ClStringList unwrapName(vector<T> args)
     ClStringList vec;
     for (T arg : args)
     {
-        vec.push_back(arg->name());
+        vec.insert(arg->name());
     }
     return vec;
 }

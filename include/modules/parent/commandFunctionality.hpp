@@ -17,16 +17,15 @@ public:
     ClCommandPtrList commands_ {};
 
 public:
-    CommandFunc_() : OptionFunc_() {};
     bool addCommand(ClCommand& command);
     bool addCommands(const ClCommandPtrList& commands);
-    string getHelp();
-    void showHelp();
-    void showHelp(int exitCode);
+    [[nodiscard]] string getHelp() const;
+    void showHelp() const;
+    void showHelp(int exitCode) const;
     ClCommandPtrList& pcommands();
-    ClCommandList commands();
+    [[nodiscard]] ClCommandList commands() const;
     bool addForAllLayers(ClOption option);
-    bool checkForAllLayers(ClOption& option);
+    bool checkForAllLayers(ClOption& option) const;
 };
 
 #include "../ClCommand.hpp"
