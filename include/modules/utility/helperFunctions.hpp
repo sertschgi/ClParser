@@ -32,9 +32,9 @@ template<typename T> struct is_shared_ptr<shared_ptr<T>> : std::true_type {};
 
 // checks if there is an object with the same T::name in the vector
 template <class T>
-static bool sameNameOfObjInVec(const T object, const set<T> &objects) {
+static bool sameNameOfObjInVec(const T object, const list<T> &objects) {
     for (const T& obj : objects)
-        if constexpr (is_shared_ptr<T>::value)
+        if constexpr (is_pointer_v<T>)
         {
             if (obj->name() == object->name()) return true;
         }
@@ -46,15 +46,16 @@ static bool sameNameOfObjInVec(const T object, const set<T> &objects) {
 }
 
 template <class T>
-static bool addObjToVec(T object, set<T> &objects)
+static bool addObjToVec(T object, list<T> & objects)
 {
     if (sameNameOfObjInVec<T>(object, objects)) return false;
-    objects.insert(object);
+    objects.emplace_back(object);
     return true;
 }
 
+
 template <class T>
-static size_t addVecToVec(const set<T> &objVec0, set<T> &objVec1)
+static size_t addVecToVec(const list<T> &objVec0, list<T> & objVec1)
 {
     size_t value = 0;
     for (T arg : objVec0)
@@ -66,16 +67,16 @@ static size_t addVecToVec(const set<T> &objVec0, set<T> &objVec1)
 
 template <typename I>
 static size_t addObjectsToVecAsPtr(
-        set<shared_ptr<typename I::value_type>> &vecTo, I start, I end
+        list<typename I::value_type *> &vecTo, I start, I end
 ) {
     size_t skipped = 0;
     for (auto it = start; it != end; ++it)
-        if (!addObjToVec<shared_ptr<typename I::value_type>>(make_shared<typename I::value_type>(*it), vecTo)) ++skipped;
+        if (!addObjToVec<typename I::value_type *>(&(*it), vecTo)) ++skipped;
     return skipped;
 }
 
 template <class T>
-static ClStringList unwrapName(set<T> args)
+static ClStringList unwrapName(list<T> args)
 {
     ClStringList set;
     for (T arg : args)
@@ -88,13 +89,13 @@ static ClStringList unwrapName(set<T> args)
 template <class T>
 static bool longest(const T& largestObj, const T& firstObj)
 {
-    return largestObj.name().size() > firstObj.name().size();
+    return largestObj.name().size() < firstObj.name().size();
 }
 
 template <class T>
 static bool longestFlags(const T& largestObj, const T& firstObj)
 {
-    return largestObj.flags().size() > firstObj.flags().size();
+    return join(largestObj.flags()).size() < join(firstObj.flags()).size();
 }
 
 

@@ -8,7 +8,7 @@
 class OptionFunc_ {
 protected:
     ClOptionPtrList options_ {};
-    ClOptionList ownOptions_ {};
+    ClOptionList ownOptions_ {ClOption({},{},{})};
 
 public:
     bool addOption(ClOption& option);

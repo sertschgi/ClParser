@@ -19,7 +19,10 @@ private:
             const ClCommandPtrList& commands, const ClOptionPtrList& options,
             const ClPosArgPtrList& posArgs
     );
-    void parse_(ClStringList& args, ClCommand& clcmd);
+    bool checkOptions(const string& arg, CommandFuncPtr ccmd);
+    ClCommandPtr checkCommands(const string& arg, CommandFuncPtr ccmd);
+    bool checkPosArgs(const string& arg, const CommandFuncPtr& ccmd);
+    void parse_(ClStringList& args, CommandFuncPtr clcmd);
 
 public:
     ClParser();

@@ -15,9 +15,9 @@ void ClParser::init_(
         const ClCommandPtrList &commands, const ClOptionPtrList &options,
         const ClPosArgPtrList &posArgs
 ) {
-    addVecToVec<ClCommandPtr>(commands, this->commands_);
-    addVecToVec<ClOptionPtr>(options, this->options_);
-    addVecToVec<ClPosArgPtr>(posArgs, this->posArgs_);
+    this->addCommands(commands);
+    this->addOptions(options);
+    this->addPosArguments(posArgs);
 }
 
 ClParser::ClParser() = default;
@@ -77,13 +77,14 @@ void addClPosArgToSet(const ClPosArgPtrList& posArgsFrom, ClPosArgPtrList& posAr
     addVecToVec<ClPosArgPtr>(posArgsFrom, posArgsTo);
 }
 
-void ClParser::parse_(ClStringList& args, ClCommand &clcmd) {
+/*
+void ClParser::parse_(ClStringList& args, CommandFuncPtr clcmd) {
     if (args.empty())
         return;
 
     string arg = *args.begin();
 
-    for (ClOptionPtr opt : clcmd.poptions())
+    for (const ClOptionPtr& opt : clcmd->poptions())
     {
         for (const string &sm : opt->flags())
         {
@@ -99,15 +100,15 @@ void ClParser::parse_(ClStringList& args, ClCommand &clcmd) {
 
     }
 
-    for (ClCommandPtr cmd : clcmd.pcommands())
+    for (const ClCommandPtr& cmd : clcmd->pcommands())
     {
         if (arg == cmd->name())
         {
-            checkClPosInOpt(clcmd.poptions());
+            checkClPosInOpt(clcmd->poptions());
             addClPosArgToSet(cmd->posArgs(), this->posArgsToSet_);
             cmd->setIsSet(true);
             args.erase(args.begin());
-            this->parse_(args, *cmd);
+            this->parse_(args, cmd);
             return;
         }
     }
@@ -120,16 +121,69 @@ void ClParser::parse_(ClStringList& args, ClCommand &clcmd) {
         this->parse_(args, clcmd);
     }
 
-    checkClPosInOpt(clcmd.poptions());
+    checkClPosInOpt(clcmd->poptions());
 }
+ */
+
+bool ClParser::checkOptions(const string& arg, CommandFuncPtr ccmd)
+{
+    for (const ClOptionPtr& opt : ccmd->poptions()) {
+        for (const string &sm: opt->flags()) {
+            if (arg == sm) {
+                opt->setIsSet(true);
+                addClPosArgToSet(opt->posArgs(), this->posArgsToSet_);
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+ClCommandPtr ClParser::checkCommands(const string& arg, CommandFuncPtr ccmd)
+{
+    for (ClCommandPtr cmd: ccmd->pcommands()) {
+        if (arg == cmd->name()) {
+            checkClPosInOpt(ccmd->poptions());
+            addClPosArgToSet(cmd->posArgs(), this->posArgsToSet_);
+            cmd->setIsSet(true);
+            return cmd;
+        }
+    }
+    return nullptr;
+}
+
+bool ClParser::checkPosArgs(const string& arg, const CommandFuncPtr& ccmd)
+{
+    if (!this->posArgsToSet_.empty()) {
+        (*this->posArgsToSet_.begin())->setValue(arg);
+        this->posArgsToSet_.erase(posArgsToSet_.begin());
+        return true;
+    }
+    return false;
+}
+
+void ClParser::parse_(ClStringList& args, CommandFuncPtr clcmd) {
+
+    for (const string& arg : args) {
+        if (checkOptions(arg, clcmd)) continue;
+
+        ClCommandPtr cmd = checkCommands(arg, clcmd);
+        if (cmd) {clcmd = cmd; continue;}
+
+        if (checkPosArgs(arg, clcmd)) continue;
+        checkClPosInOpt(clcmd->poptions());
+    }
+}
+
 
 void ClParser::parse(int &argc, char *argv[])
 {
     ClStringList args(argv + 1, argv + argc);
-    ClCommand cmd({}, this->options_, this->commands_, {});
-    this->parse_(args, cmd);
-    this->options_ = cmd.poptions();
-    this->commands_ = cmd.pcommands();
+    // ClCommand cmd({}, this->options_, this->commands_, {});
+    CommandFuncPtr cmdfcptr = this;
+    this->parse_(args, cmdfcptr);
+    // this->options_ = cmd.poptions();
+    // this->commands_ = cmd.pcommands();
 
     for (const ClOptionPtr& option : this->options_)
     {

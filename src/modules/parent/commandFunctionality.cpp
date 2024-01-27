@@ -5,12 +5,11 @@
 #include "modules/parent/commandFunctionality.hpp"
 #include "modules/utility/helperFunctions.hpp"
 
-
 using namespace std;
 
-bool CommandFunc_::addCommand(ClCommand &command)
+bool CommandFunc_::addCommand(ClCommand & command)
 {
-    return addObjToVec<ClCommandPtr>(make_shared<ClCommand>(command), this->commands_);
+    return addObjToVec<ClCommandPtr>(&command, this->commands_);
 }
 
 bool CommandFunc_::addCommands(const ClCommandPtrList &commands)
@@ -21,30 +20,30 @@ bool CommandFunc_::addCommands(const ClCommandPtrList &commands)
 bool CommandFunc_::addForAllLayers(ClOption option)
 {
     if (!this->addOwnOption(option)) return false;
-    for (ClCommandPtr cmd : this->commands_) cmd->addForAllLayers(option);
+    for (const ClCommandPtr& cmd : this->commands_) cmd->addForAllLayers(option);
     return true;
 }
 
 bool CommandFunc_::checkForAllLayers(ClOption &option) const
 {
-    for (ClOptionPtr opt : this->options_)
+    for (const ClOptionPtr& opt : this->options_)
     {
         if (opt->name() == option.name() && opt->isSet())
         {
-            if (option.name() == "help")
-            {
-                this->showHelp();
-            }
+            if (option.name() == "help") this->showHelp();
             return true;
         }
     }
-    for (ClCommandPtr cmd : this->commands_) return cmd->checkForAllLayers(option);
+    for (const ClCommandPtr& cmd : this->commands_)
+    {
+        return cmd->checkForAllLayers(option);
+    }
     return false;
 }
 
 string CommandFunc_::getHelp() const
 {
-    string helpstr;
+    string helpstr {};
 
     if (!this->desc_.empty())
     {
@@ -57,20 +56,25 @@ string CommandFunc_::getHelp() const
     if (!this->options_.empty()) {
         helpstr += "\noptions:\n";
 
-        ClOptionList opts = this->options();
+        const ClOptionList& opts = this->options();
 
-        ClOption longestOptFlag = *max_element(opts.begin(), opts.end(), longestFlags<ClOption>);
-        size_t longestOptFlagSize = join(longestOptFlag.flags()).size();
 
-        ClOption longestOptName = *max_element(opts.begin(), opts.end(), longest<ClOption>);
-        size_t longestOptNameSize = longestOptName.name().size();
+        const ClOption& longestOptFlag = *max_element(opts.begin(), opts.end(), longestFlags<ClOption>);
 
-        for (ClOption opt: opts) {
+        const size_t& longestOptFlagSize = join(longestOptFlag.flags()).size();
+
+        const ClOption& longestOptName = *max_element(opts.begin(), opts.end(), longest<ClOption>);
+        const size_t& longestOptNameSize = longestOptName.name().size();
+
+        for (const ClOption& opt : opts) {
+            const size_t& optFlagSize = join(opt.flags()).size();
+            const size_t& optNameSize = opt.name().size();
+
             helpstr += join(opt.flags())
-                       + string(longestOptFlagSize - join(opt.flags()).size(), ' ')
+                       + string(longestOptFlagSize - optFlagSize + 1, ' ')
                        + "  |  "
                        + opt.name()
-                       + string(longestOptNameSize - opt.name().size(), ' ')
+                       + string(longestOptNameSize - optNameSize + 1, ' ')
                        + "  |  "
                        + opt.desc() + "\n";
         }
@@ -84,10 +88,9 @@ string CommandFunc_::getHelp() const
         ClCommand longestCmdName = *max_element(commands.begin(), commands.end(), longest<ClCommand>);
         size_t longestCmdNameSize = longestCmdName.name().size();
 
-        for (ClCommand cmd: commands) {
-            size_t sizeDiff = longestCmdNameSize - cmd.name().size();
+        for (const ClCommand& cmd : commands) {
             helpstr += cmd.name()
-                       + string(sizeDiff, ' ')
+                       + string(longestCmdNameSize - cmd.name().size() + 1, ' ')
                        + "  |  " + cmd.desc()
                        + "\n";
         }

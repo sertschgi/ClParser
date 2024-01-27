@@ -4,6 +4,7 @@
 /* ############ Cl StringList ############# */
 
 #include <string>
+#include <list>
 #include <vector>
 #include <set>
 #include <algorithm>
@@ -28,9 +29,9 @@ class ClPtrList;
 #include <cstdarg>
 
 template <class T>
-class ClPtrList : public set<shared_ptr<T>> {
+class ClPtrList : public list<T*> {
 public:
-    using set<shared_ptr<T>>::set;
+    using list<T*>::list;
 
     /*
     [[nodiscard]] ClPtrList<T> toPtrList(initializer_list<T&>& init) const {
@@ -85,17 +86,15 @@ public:
 
     ClPtrList(initializer_list<reference_wrapper<T>> init)
     {
-        for (const reference_wrapper<T> & objRef : init)
-        {
-            shared_ptr<T> shared(&objRef.get());
-            this->insert(move(shared));
-        }
+        for (const reference_wrapper<T> &objRef: init)
+            this->emplace_back(&objRef.get());
+
     }
 
     [[nodiscard]] ClObjList<T> toObjList() const {
         ClObjList<T> objList;
-        for (shared_ptr<T> obj : *this)
-            objList.insert(*obj);
+        for (T * obj : *this)
+            objList.emplace_back(*obj);
         return objList;
     };
 };
@@ -104,9 +103,9 @@ public:
 /* ############# CL OBJ LIST ############# */
 
 template <class T>
-class ClObjList : public set<T> {
+class ClObjList : public list<T> {
 public:
-    using set<T>::set;
+    using list<T>::list;
     /*
     [[nodiscard]] ClPtrList<T> toPtrList() const {
         ClPtrList<T> objList;
@@ -123,7 +122,7 @@ public:
     [[nodiscard]] ClPtrList<T> toPtrList() const {
         ClPtrList<T> ptrList;
         transform(this->begin(), this->end(), inserter(ptrList, ptrList.end()),
-                  [](const T& obj) {return make_shared<T>(obj);});
+                  [](const T& obj) {return &obj;});
         return ptrList;
     }
 };

@@ -21,15 +21,14 @@ const ClOptionList &OptionFunc_::ownOptions() const
 
 bool OptionFunc_::addOption(ClOption &option)
 {
-    return addObjToVec<ClOptionPtr>(make_shared<ClOption>(option), this->options_);
+    return addObjToVec<ClOptionPtr>(&option, this->options_);
 }
 
 bool OptionFunc_::addOwnOption(ClOption option)
 {
     bool notSkipped = addObjToVec<ClOption>(option, this->ownOptions_);
-    ClOptionPtr optInOwnOpts = make_shared<ClOption>(*find(this->ownOptions_.begin(), this->ownOptions_.end(), option));
-    return addObjToVec<ClOptionPtr>(optInOwnOpts, this->options_) ||
-           notSkipped;
+    return addObjToVec<ClOptionPtr>(&this->ownOptions_.back(),
+                                    this->options_) || notSkipped;
 }
 
 bool OptionFunc_::addOptions(const ClOptionPtrList &options)

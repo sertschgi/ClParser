@@ -15,7 +15,7 @@ class ClCommand;
 
 #include "../ClLists.hpp"
 
-using ClCommandPtr = shared_ptr<ClCommand>;
+using ClCommandPtr = ClCommand*;
 using ClCommandList = ClObjList<ClCommand>;
 using ClCommandPtrList = ClPtrList<ClCommand>;
 

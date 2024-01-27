@@ -28,6 +28,8 @@ public:
     bool checkForAllLayers(ClOption& option) const;
 };
 
+using CommandFuncPtr = CommandFunc_*;
+
 #include "../ClCommand.hpp"
 
 #endif //CLPARSER_COMMANDFUNCTIONALITY_HPP

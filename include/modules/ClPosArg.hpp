@@ -33,7 +33,7 @@ public:
 
 #include "ClLists.hpp"
 
-using ClPosArgPtr = shared_ptr<ClPosArg>;
+using ClPosArgPtr = ClPosArg*;
 using ClPosArgList = ClObjList<ClPosArg>;
 using ClPosArgPtrList = ClPtrList<ClPosArg>;
 

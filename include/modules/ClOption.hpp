@@ -40,7 +40,7 @@ public:
 
 /* ############# CL OPTION LIST ############# */
 
-using ClOptionPtr = shared_ptr<ClOption>;
+using ClOptionPtr = ClOption*;
 using ClOptionList = ClObjList<ClOption>;
 using ClOptionPtrList = ClPtrList<ClOption>;
 
