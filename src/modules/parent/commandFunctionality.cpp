@@ -36,7 +36,7 @@ bool CommandFunc_::checkForAllLayers(ClOption &option) const
     }
     for (const ClCommandPtr& cmd : this->commands_)
     {
-        return cmd->checkForAllLayers(option);
+        if (cmd->checkForAllLayers(option)) return true;
     }
     return false;
 }
