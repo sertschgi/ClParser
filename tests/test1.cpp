@@ -51,8 +51,8 @@ int main(int argc, char* argv[]) {
 
     parser.parse(argc, argv);
 
-    if (datasetLabelPosArg.isSet())
-        cout << datasetLabelPosArg.cvalue() << endl;
+    if (datasetNamePosArg.isSet())
+        cout << "set" << endl << datasetNamePosArg.value() << endl;
 
     cout << "finished";
 }

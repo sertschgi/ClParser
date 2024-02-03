@@ -65,7 +65,6 @@ void checkClPosInOpt(const ClOptionPtrList& options)
         return;
     for (const ClOptionPtr& opt : options)
     {
-
         checkClPosArgs(opt->posArgs());
     }
 }
@@ -143,7 +142,6 @@ ClCommandPtr ClParser::checkCommands(const string& arg, CommandFuncPtr ccmd)
 {
     for (ClCommandPtr cmd: ccmd->pcommands()) {
         if (arg == cmd->name()) {
-            checkClPosInOpt(ccmd->poptions());
             addClPosArgToSet(cmd->posArgs(), this->posArgsToSet_);
             cmd->setIsSet(true);
             return cmd;
@@ -155,7 +153,7 @@ ClCommandPtr ClParser::checkCommands(const string& arg, CommandFuncPtr ccmd)
 bool ClParser::checkPosArgs(const string& arg, const CommandFuncPtr& ccmd)
 {
     if (!this->posArgsToSet_.empty()) {
-        (*this->posArgsToSet_.begin())->setValue(arg);
+        this->posArgsToSet_.front()->setValue(arg);
         this->posArgsToSet_.erase(posArgsToSet_.begin());
         return true;
     }
@@ -168,11 +166,13 @@ void ClParser::parse_(ClStringList& args, CommandFuncPtr clcmd) {
         if (checkOptions(arg, clcmd)) continue;
 
         ClCommandPtr cmd = checkCommands(arg, clcmd);
-        if (cmd) {clcmd = cmd; continue;}
+        if (cmd) {checkClPosInOpt(clcmd->poptions()); clcmd = cmd; continue;}
 
         if (checkPosArgs(arg, clcmd)) continue;
+
         checkClPosInOpt(clcmd->poptions());
     }
+    checkClPosInOpt(clcmd->poptions());
 }
 
 
