@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
         "Specify the images path.", { datasetImagePathPosArg }
     );
 
-    ClOptionPtrList optlist = { datasetNameOption };
+    ClOptionPtrList optlist = { datasetNameOption, datasetLabelOption };
 
     ClCommand createDatasetCommand(
         "dataset", optlist, "creates a Dataset"
@@ -52,7 +52,8 @@ int main(int argc, char* argv[]) {
     parser.parse(argc, argv);
 
     if (datasetNamePosArg.isSet())
-        cout << "set" << endl << datasetNamePosArg.value() << endl;
+        cout << "set" << endl << datasetNamePosArg.cvalue() << endl;
+        cout << datasetLabelPosArg.cvalue() << endl;
 
     cout << "finished";
 }
