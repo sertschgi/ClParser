@@ -50,5 +50,4 @@ public:
     void showName() const;
     void showDescription() const;
 };
- s
 #endif //CLPARSER_CLPARSER_HPP
