@@ -26,6 +26,7 @@ public:
     [[nodiscard]] ClCommandList commands() const;
     bool addForAllLayers(ClOption option);
     bool checkForAllLayers(ClOption& option) const;
+    [[nodiscard]] bool ownOptSet(const string& name) const;
 };
 
 using CommandFuncPtr = CommandFunc_*;

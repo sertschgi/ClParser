@@ -238,3 +238,8 @@ void ClParser::showDescription() const
 {
     cout << this->name_ << " " << this->appVersion_ << endl;
 }
+
+bool ClParser::versionIsSet() const
+{
+    return this->ownOptSet("version");
+}

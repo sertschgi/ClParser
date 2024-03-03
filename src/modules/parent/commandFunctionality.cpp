@@ -120,3 +120,10 @@ ClCommandList CommandFunc_::commands() const
 {
     return this->commands_.toObjList();
 }
+
+bool CommandFunc_::ownOptSet(const string& name) const
+{
+    return any_of(this->ownOptions_.begin(), this->ownOptions_.end(), [&](const ClOption& opt){
+        return opt.name() == name;
+    });
+}

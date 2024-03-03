@@ -47,6 +47,7 @@ public:
     void addAppName(const string& name);
     void addAppVersion(const string& versionName);
     void showVersion() const;
+    [[nodiscard]] bool versionIsSet() const;
     void showName() const;
     void showDescription() const;
 };
