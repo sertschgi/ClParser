@@ -214,11 +214,6 @@ bool ClParser::addVersionOption()
     );
 }
 
-void ClParser::showVersion() const
-{
-    cout << this->name() << appVersion_;
-}
-
 void ClParser::addAppName(const string &name)
 {
     this->name_ = name;
@@ -227,4 +222,19 @@ void ClParser::addAppName(const string &name)
 void ClParser::addAppVersion(const string& versionName)
 {
     this->appVersion_ = versionName;
+}
+
+void ClParser::showVersion() const
+{
+    cout << this->name() << appVersion_ << endl;
+}
+
+void ClParser::showName() const
+{
+    cout << this->name_ << endl;
+}
+
+void ClParser::showDescription() const
+{
+    cout << this->name_ << " " << this->appVersion_ << endl;
 }
